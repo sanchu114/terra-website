@@ -45,7 +45,7 @@ const App = () => {
     setAiError('');
     
     // APIキーの設定（ここにGoogle AI Studioで取得したキーを入れてください）
-    const apiKey = ""; 
+    const apiKey = "REDACTED_GEMINI_API_KEY"; 
     
     const systemPrompt = `
       あなたは愛媛県今治市伯方島にある簡易宿所「Terra（テラ）」のAIアシスタントです。
