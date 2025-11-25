@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <!-- ロゴ画像を設定（publicフォルダの画像を参照） -->
+    <link rel="icon" href="%PUBLIC_URL%/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2C3E28" />
+    <meta
+      name="description"
+      content="愛媛県今治市・伯方島の簡易宿所「Terra」。暮らすように泊まる、静かな大人の隠れ家です。"
+    />
+    <!-- ページタイトル -->
+    <title>Terra -Shimanami- | 暮らすように泊まる</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    
+    <!-- ここにReact（App.js）の中身が描画されます -->
+    <div id="root"></div>
+
+    <!-- 
+      【重要】Netlify Forms用のダミーフォーム 
+      Reactの場合、ビルド時にこの静的なHTMLフォームが存在しないと、
+      Netlifyがフォームを認識してくれません。
+      hidden属性がついているので、画面には表示されません。
+    -->
+    <form name="booking" netlify netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="date" name="checkin" />
+      <input type="date" name="checkout" />
+      <input type="number" name="guests" />
+      <textarea name="message"></textarea>
+    </form>
+  </body>
+</html>
