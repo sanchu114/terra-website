@@ -281,7 +281,7 @@ const App = () => {
             {[
               { icon: <Wifi size={24} />, title: "Free Wi-Fi", desc: "高速光回線" },
               { icon: <Laptop size={24} />, title: "Work Space", desc: "静かな書斎・デスク" },
-              { icon: <CookingPot size={24} />, title: "Kitchen", desc: "自炊を楽しむ広いDK" },
+              { icon: <Utensils size={24} />, title: "Kitchen", desc: "自炊を楽しむ広いDK" },
               { icon: <Dog size={24} />, title: "Pet Friendly", desc: "小型犬OK（要連絡）" },
             ].map((item, index) => (
               <div key={index} className="bg-white p-6 rounded-sm shadow-sm text-center hover:shadow-md transition-shadow">
