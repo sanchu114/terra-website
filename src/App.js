@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee } from 'lucide-react';
+import { Menu, X, MapPin, Wifi, CookingPot, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -165,11 +165,11 @@ const App = () => {
       >
         <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            {/* ロゴ画像: publicフォルダのlogo.pngを参照 */}
+            {/* 修正：ロゴ画像を大きくしました（h-16 md:h-24） */}
             <img 
               src="/logo.png" 
               alt="Terra Logo" 
-              className="h-12 md:h-14 w-auto object-contain" 
+              className="h-16 md:h-24 w-auto object-contain" 
             />
           </div>
 
@@ -281,7 +281,7 @@ const App = () => {
             {[
               { icon: <Wifi size={24} />, title: "Free Wi-Fi", desc: "高速光回線" },
               { icon: <Laptop size={24} />, title: "Work Space", desc: "静かな書斎・デスク" },
-              { icon: <Utensils size={24} />, title: "Kitchen", desc: "自炊を楽しむ広いDK" },
+              { icon: <CookingPot size={24} />, title: "Kitchen", desc: "自炊を楽しむ広いDK" },
               { icon: <Dog size={24} />, title: "Pet Friendly", desc: "小型犬OK（要連絡）" },
             ].map((item, index) => (
               <div key={index} className="bg-white p-6 rounded-sm shadow-sm text-center hover:shadow-md transition-shadow">
