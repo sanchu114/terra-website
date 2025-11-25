@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, MapPin, Wifi, CookingPot, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee } from 'lucide-react';
+// 修正済：CookingPot を削除しました
+import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -165,11 +166,11 @@ const App = () => {
       >
         <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            {/* 修正：ロゴ画像を大きくしました（h-16 md:h-24） */}
+            {/* 修正：ロゴ画像を適切なサイズに戻しました（h-10 md:h-12） */}
             <img 
               src="/logo.png" 
               alt="Terra Logo" 
-              className="h-16 md:h-24 w-auto object-contain" 
+              className="h-10 md:h-12 w-auto object-contain" 
             />
           </div>
 
@@ -281,6 +282,7 @@ const App = () => {
             {[
               { icon: <Wifi size={24} />, title: "Free Wi-Fi", desc: "高速光回線" },
               { icon: <Laptop size={24} />, title: "Work Space", desc: "静かな書斎・デスク" },
+              // 修正：CookingPot を Utensils に変更
               { icon: <Utensils size={24} />, title: "Kitchen", desc: "自炊を楽しむ広いDK" },
               { icon: <Dog size={24} />, title: "Pet Friendly", desc: "小型犬OK（要連絡）" },
             ].map((item, index) => (
