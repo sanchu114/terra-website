@@ -166,11 +166,11 @@ const App = () => {
       >
         <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            {/* 修正：ロゴ画像を適切なサイズに戻しました（h-10 md:h-12） */}
+            {/* 修正：スクロール時にロゴを白く反転させるフィルターを追加 */}
             <img 
               src="/logo.png" 
               alt="Terra Logo" 
-              className="h-10 md:h-12 w-auto object-contain" 
+              className={`h-10 md:h-12 w-auto object-contain transition-all duration-300 ${scrolled ? 'brightness-0 invert' : ''}`}
             />
           </div>
 
