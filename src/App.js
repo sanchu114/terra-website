@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-// 必要なアイコンをインポート
+// 修正済：CookingPot を削除しました
 import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee } from 'lucide-react';
 
 const App = () => {
@@ -15,6 +15,28 @@ const App = () => {
 
   // フォーム関連のState
   const [formStatus, setFormStatus] = useState(null); // null, 'submitting', 'success', 'error'
+
+  // スライドショー関連のState
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // 修正：拡張子をすべて .png に統一しました！
+  const heroImages = [
+    "/assets/photos/hero1.jpg", 
+    "/assets/photos/hero2.jpg",
+    "/assets/photos/hero3.png",
+    "/assets/photos/hero4.png",
+  ];
+
+  // スライドショーのタイマー設定
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000); // 5秒ごとに切り替え
+
+    return () => clearInterval(intervalId);
+  }, [heroImages.length]);
 
   // スクロール検知
   useEffect(() => {
@@ -44,12 +66,28 @@ const App = () => {
     setAiResponse('');
     setAiError('');
     
-    // ★ここにAPIキーを入れてください★
+    // APIキーの設定（ここにGoogle AI Studioで取得したキーを入れてください）
     const apiKey = ""; 
     
     const systemPrompt = `
       あなたは愛媛県今治市伯方島にある簡易宿所「Terra（テラ）」のAIアシスタントです。
-      （中略...AIの設定はそのまま...）
+      
+      【Terraのコンセプト】
+      - 「暮らすように泊まる」静かな大人の隠れ家。
+      - 住所：愛媛県今治市伯方町北浦甲1501−3
+      - 近くの店：山中商店（徒歩圏内・食材あり）、コンビニ（車5分）、道の駅マリンオアシスはかた（車10分）
+      
+      【回答のためのカンペ】
+      1. 買い物・食事:
+         - 基本は自炊推奨だが、「山中商店」で手作りのお弁当や朝食の注文が可能（要予約・別料金）。
+         - 外食ならランチで「さんわ（ラーメン）」「お好み焼き」などを提案。
+      2. 観光・リフレッシュ:
+         - 「開山公園（桜・展望）」「船折瀬戸（潮流）」など自然スポットを推す。
+      3. レシピ提案:
+         - 山中商店で買える食材を使った、フライパン一つでできる男飯や、疲れた体に優しいスープなどを提案。
+      
+      【トーン＆マナー】
+      - 落ち着いていて、少し詩的で丁寧なトーン。
     `;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
@@ -114,7 +152,7 @@ const App = () => {
     }
   };
 
-  // ★ここが修正ポイント：フォーム送信処理を確実に動くように修正
+  // 予約フォーム送信ハンドラ
   const handleBookingSubmit = (e) => {
     e.preventDefault();
     setFormStatus('submitting');
@@ -126,19 +164,13 @@ const App = () => {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(formData).toString()
     })
-    .then(() => {
-      // 送信成功したらステータスを 'success' に変更（これで画面が切り替わる）
-      setFormStatus('success');
-    })
-    .catch((error) => {
-      console.error(error);
-      setFormStatus('error');
-    });
+    .then(() => setFormStatus('success'))
+    .catch((error) => setFormStatus('error'));
   };
 
   return (
     <div className="min-h-screen bg-[#FDFCF8] text-stone-800 font-sans selection:bg-[#4A5D23] selection:text-white">
-      {/* Netlify Forms用 Hidden Input */}
+      {/* React側でのフォーム設定（hidden） */}
       <form name="booking" netlify="true" hidden>
         <input type="text" name="name" />
         <input type="email" name="email" />
@@ -156,6 +188,7 @@ const App = () => {
       >
         <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
+            {/* ロゴ画像 */}
             <img 
               src="/logo.png" 
               alt="Terra Logo" 
@@ -203,36 +236,45 @@ const App = () => {
         )}
       </header>
 
-      {/* ヒーローセクション（中略：内容はそのまま） */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-stone-900">
-          <img 
-            src="/api/placeholder/1920/1080" 
-            alt="Terraからの伯方島の風景" 
-            className="w-full h-full object-cover opacity-60"
-          />
-        </div>
+      {/* ヒーローセクション（スライドショー実装） */}
+      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-stone-900">
+        {/* 背景画像スライドショー */}
+        {heroImages.map((img, index) => (
+          <div 
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-[2000ms] ease-in-out ${
+              index === currentImageIndex ? 'opacity-60' : 'opacity-0'
+            }`}
+          >
+            {/* ズームエフェクトを追加 */}
+            <img 
+              src={img} 
+              alt={`Terra Slide ${index + 1}`} 
+              className={`w-full h-full object-cover transition-transform duration-[10000ms] ease-linear ${
+                index === currentImageIndex ? 'scale-110' : 'scale-100'
+              }`}
+            />
+          </div>
+        ))}
+        
         <div className="relative z-10 text-center px-4 text-white max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight drop-shadow-lg">
             暮らすように、<br/>泊まる。
           </h1>
-          <p className="text-base md:text-lg mb-12 leading-loose tracking-widest font-serif opacity-90">
+          <p className="text-base md:text-lg mb-12 leading-loose tracking-widest font-serif opacity-90 drop-shadow-md">
             しまなみ海道・伯方島の山間にある一軒家。<br className="hidden md:block"/>
             聞こえるのは、風の音と鳥の声だけ。<br className="hidden md:block"/>
             何もしない時間を過ごすための、大人の隠れ家です。
           </p>
-          <a href="#contact" className="inline-flex items-center gap-2 bg-[#4A5D23] hover:bg-[#3A4A1C] text-white px-8 py-3 rounded-sm transition-colors duration-300 tracking-widest text-sm">
+          <a href="#contact" className="inline-flex items-center gap-2 bg-[#4A5D23] hover:bg-[#3A4A1C] text-white px-8 py-3 rounded-sm transition-colors duration-300 tracking-widest text-sm shadow-lg">
             ご予約・空室確認 <ArrowRight size={16} />
           </a>
         </div>
       </section>
 
-      {/* コンセプト〜アクセスセクション（中略：変更なし） */}
-      {/* ... (これまでのコードと同じ内容が入ります。長くなるので省略しますが、手元のファイルでは消さないでください！) ... */}
-      
+      {/* コンセプト */}
       <section id="concept" className="py-20 md:py-32 px-4 bg-white">
-         {/* ...コンセプトの中身... */}
-         <div className="container mx-auto max-w-5xl">
+        <div className="container mx-auto max-w-5xl">
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="md:w-1/2 space-y-6">
               <span className="text-[#4A5D23] font-bold tracking-widest text-sm block mb-2">CONCEPT</span>
@@ -249,7 +291,8 @@ const App = () => {
             <div className="md:w-1/2">
               <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   <img src="/api/placeholder/800/600" alt="Terraの縁側と庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                   {/* 修正：すべて .png に統一 */}
+                   <img src="/assets/photos/niwa.png" alt="Terraの縁側と庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 </div>
                 <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FDFCF8] p-4 hidden md:block">
                   <div className="w-full h-full border border-[#4A5D23] flex items-center justify-center text-[#4A5D23]">
@@ -261,10 +304,10 @@ const App = () => {
           </div>
         </div>
       </section>
-      
+
+      {/* お部屋と設備 */}
       <section id="rooms" className="py-20 bg-[#F5F5F0]">
-         {/* ...お部屋の中身... */}
-         <div className="container mx-auto px-4 max-w-6xl">
+        <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-16">
             <span className="text-[#4A5D23] font-bold tracking-widest text-sm">ROOMS & FACILITIES</span>
             <h2 className="text-3xl font-serif text-stone-800 mt-2">お部屋と設備</h2>
@@ -303,19 +346,20 @@ const App = () => {
              </div>
              <div className="order-2 md:order-1">
                <div className="grid grid-cols-2 gap-4">
-                 <img src="/api/placeholder/400/300" alt="縁側" className="w-full h-40 object-cover rounded-sm" />
-                 <img src="/api/placeholder/400/300" alt="ハンモック" className="w-full h-40 object-cover rounded-sm" />
-                 <img src="/api/placeholder/400/300" alt="ダイニング" className="w-full h-40 object-cover rounded-sm" />
-                 <img src="/api/placeholder/400/300" alt="外観" className="w-full h-40 object-cover rounded-sm" />
+                 {/* 修正：すべて .png に統一 */}
+                 <img src="/assets/photos/engawa.png" alt="縁側" className="w-full h-40 object-cover rounded-sm" />
+                 <img src="/assets/photos/hammock.png" alt="2Fからの眺め" className="w-full h-40 object-cover rounded-sm" />
+                 <img src="/assets/photos/dining.png" alt="ダイニング" className="w-full h-40 object-cover rounded-sm" />
+                 <img src="/assets/photos/exterior.png" alt="外観" className="w-full h-40 object-cover rounded-sm" />
                </div>
              </div>
           </div>
         </div>
       </section>
 
+      {/* 注意事項セクション */}
       <section id="notes" className="py-20 bg-white border-b border-stone-100">
-         {/* ...注意事項の中身... */}
-         <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
             <span className="text-[#4A5D23] font-bold tracking-widest text-sm">THINGS TO KNOW</span>
             <h2 className="text-3xl font-serif text-stone-800 mt-2">知っておいていただきたいこと</h2>
@@ -354,14 +398,15 @@ const App = () => {
         </div>
       </section>
 
+      {/* お食事セクション */}
       <section id="meals" className="py-20 bg-[#F9FAF6] border-y border-stone-100">
-         {/* ...お食事の中身... */}
-         <div className="container mx-auto px-4 max-w-5xl">
+        <div className="container mx-auto px-4 max-w-5xl">
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="md:w-1/2">
                <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   <img src="/api/placeholder/800/600" alt="山中商店のお弁当イメージ" className="w-full h-full object-cover" />
+                   {/* 修正：すべて .png に統一 */}
+                   <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ（自炊イメージ）" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#F9FAF6] p-4 hidden md:block">
                   <div className="w-full h-full border border-[#4A5D23] flex flex-col items-center justify-center text-[#4A5D23]">
@@ -389,9 +434,9 @@ const App = () => {
         </div>
       </section>
 
+      {/* AIアシスタント、アクセス、予約、フッター（変更なし） */}
       <section id="ai-assistant" className="py-20 bg-gradient-to-br from-[#E8ECD6] to-[#F5F5F0]">
-         {/* ...AIアシスタントの中身... */}
-         <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-[#4A5D23] text-white px-4 py-1 rounded-full text-xs font-bold tracking-widest mb-4">
               <Sparkles size={14} /> POWERED BY GEMINI
@@ -436,8 +481,7 @@ const App = () => {
       </section>
 
       <section id="access" className="py-20 bg-[#F5F5F0]">
-         {/* ...アクセスの中身... */}
-         <div className="container mx-auto px-4 max-w-4xl text-center">
+        <div className="container mx-auto px-4 max-w-4xl text-center">
           <span className="text-[#4A5D23] font-bold tracking-widest text-sm">ACCESS</span>
           <h2 className="text-3xl font-serif text-stone-800 mt-2 mb-12">アクセス</h2>
           <div className="bg-white p-8 md:p-12 border border-stone-200 rounded-sm shadow-sm">
@@ -462,7 +506,6 @@ const App = () => {
         </div>
       </section>
 
-      {/* 予約・お問い合わせ */}
       <section id="contact" className="py-20 bg-[#2C3E28] text-white">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
@@ -474,13 +517,13 @@ const App = () => {
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Home size={24} /><span className="font-bold tracking-widest text-sm">BASIC RATE</span></div>
               <p className="text-sm opacity-80 mb-1">一棟貸し（4名様まで）</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">10,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">25,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
               <p className="text-xs opacity-60">※シーズン・曜日により変動します</p>
             </div>
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Users size={24} /><span className="font-bold tracking-widest text-sm">EXTRA GUEST</span></div>
               <p className="text-sm opacity-80 mb-1">5名様以降の追加料金</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+5,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+3,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
               <p className="text-xs opacity-60">※最大8名様まで宿泊可能</p>
             </div>
           </div>
@@ -503,8 +546,6 @@ const App = () => {
             </div>
             <div className="p-6 md:p-8">
               <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約リクエスト</h3>
-              
-              {/* ★修正ポイント：送信成功・失敗の切り替えロジック */}
               {formStatus === 'success' ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
                   <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4"><CheckCircle size={32} /></div>
@@ -513,35 +554,19 @@ const App = () => {
                   <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
                 </div>
               ) : (
-                <form 
-                  name="booking" 
-                  method="POST" 
-                  data-netlify="true"
-                  onSubmit={handleBookingSubmit} // ここでJavaScriptの送信処理を呼ぶ
-                  className="space-y-4"
-                >
+                <form name="booking" method="POST" data-netlify="true" onSubmit={handleBookingSubmit} className="space-y-4">
                   <input type="hidden" name="form-name" value="booking" />
-                  
-                  {/* ...入力項目... */}
                   <div className="grid grid-cols-2 gap-4">
                     <div><label className="block text-xs font-bold text-stone-500 mb-1">お名前 *</label><input type="text" name="name" required className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="山田 太郎" /></div>
                     <div><label className="block text-xs font-bold text-stone-500 mb-1">メールアドレス *</label><input type="email" name="email" required className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="example@email.com" /></div>
                   </div>
-                  {/* ...中略... */}
                   <div className="grid grid-cols-2 gap-4">
                     <div><label className="block text-xs font-bold text-stone-500 mb-1">チェックイン *</label><input type="date" name="checkin" required className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" /></div>
                     <div><label className="block text-xs font-bold text-stone-500 mb-1">チェックアウト *</label><input type="date" name="checkout" required className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" /></div>
                   </div>
                   <div><label className="block text-xs font-bold text-stone-500 mb-1">宿泊人数 *</label><select name="guests" className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm">{[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}名</option>)}</select></div>
                   <div><label className="block text-xs font-bold text-stone-500 mb-1">メッセージ（任意）</label><textarea name="message" rows="3" className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="チェックイン予定時刻やご質問など"></textarea></div>
-
-                  <button 
-                    type="submit" 
-                    disabled={formStatus === 'submitting'}
-                    className="w-full bg-[#4A5D23] text-white py-3 rounded-sm hover:bg-[#3A4A1C] transition-colors font-bold tracking-wider disabled:opacity-50"
-                  >
-                    {formStatus === 'submitting' ? '送信中...' : '空室状況を確認してリクエスト'}
-                  </button>
+                  <button type="submit" disabled={formStatus === 'submitting'} className="w-full bg-[#4A5D23] text-white py-3 rounded-sm hover:bg-[#3A4A1C] transition-colors font-bold tracking-wider disabled:opacity-50">{formStatus === 'submitting' ? '送信中...' : '空室状況を確認してリクエスト'}</button>
                   <p className="text-[10px] text-center text-stone-400">※この時点では予約は確定しません。</p>
                 </form>
               )}
