@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-// 修正済：CookingPot を削除しました
+// 必要なアイコンをインポート
 import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee } from 'lucide-react';
 
 const App = () => {
@@ -14,26 +14,27 @@ const App = () => {
   const aiResultRef = useRef(null);
 
   // フォーム関連のState
-  const [formStatus, setFormStatus] = useState(null); // null, 'submitting', 'success', 'error'
+  const [formStatus, setFormStatus] = useState(null); 
 
   // スライドショー関連のState
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  // 修正：拡張子をすべて .png に統一しました！
+  // 修正：拡張子を実際のファイルに合わせて修正しました
   const heroImages = [
-    "/assets/photos/hero1.jpg", 
-    "/assets/photos/hero2.jpg",
-    "/assets/photos/hero3.png",
-    "/assets/photos/hero4.png",
+    "/assets/photos/hero1.jpg", // jpg
+    "/assets/photos/hero2.jpg", // jpg
+    "/assets/photos/hero3.png", // png
+    "/assets/photos/hero4.png", // png
   ];
 
   // スライドショーのタイマー設定
   useEffect(() => {
+    // 修正：5000ms(5秒) -> 8000ms(8秒) に変更して、もっとゆっくりに
     const intervalId = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 5000); // 5秒ごとに切り替え
+    }, 8000); 
 
     return () => clearInterval(intervalId);
   }, [heroImages.length]);
@@ -242,11 +243,12 @@ const App = () => {
         {heroImages.map((img, index) => (
           <div 
             key={index}
-            className={`absolute inset-0 transition-opacity duration-[2000ms] ease-in-out ${
+            // 修正：切り替え時間 duration-[2000ms] -> [3000ms] にして、よりゆっくりフェードするように
+            className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${
               index === currentImageIndex ? 'opacity-60' : 'opacity-0'
             }`}
           >
-            {/* ズームエフェクトを追加 */}
+            {/* ズームエフェクト */}
             <img 
               src={img} 
               alt={`Terra Slide ${index + 1}`} 
@@ -291,8 +293,7 @@ const App = () => {
             <div className="md:w-1/2">
               <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   {/* 修正：すべて .png に統一 */}
-                   <img src="/assets/photos/niwa.png" alt="Terraの縁側と庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                   <img src="/assets/photos/engawa.png" alt="Terraの縁側と庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 </div>
                 <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FDFCF8] p-4 hidden md:block">
                   <div className="w-full h-full border border-[#4A5D23] flex items-center justify-center text-[#4A5D23]">
@@ -346,9 +347,8 @@ const App = () => {
              </div>
              <div className="order-2 md:order-1">
                <div className="grid grid-cols-2 gap-4">
-                 {/* 修正：すべて .png に統一 */}
                  <img src="/assets/photos/engawa.png" alt="縁側" className="w-full h-40 object-cover rounded-sm" />
-                 <img src="/assets/photos/hammock.png" alt="2Fからの眺め" className="w-full h-40 object-cover rounded-sm" />
+                 <img src="/assets/photos/view.png" alt="2Fからの眺め" className="w-full h-40 object-cover rounded-sm" />
                  <img src="/assets/photos/dining.png" alt="ダイニング" className="w-full h-40 object-cover rounded-sm" />
                  <img src="/assets/photos/exterior.png" alt="外観" className="w-full h-40 object-cover rounded-sm" />
                </div>
@@ -405,7 +405,7 @@ const App = () => {
             <div className="md:w-1/2">
                <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   {/* 修正：すべて .png に統一 */}
+                   {/* 修正：ファイル名を bento.png に変更 */}
                    <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ（自炊イメージ）" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#F9FAF6] p-4 hidden md:block">
@@ -435,6 +435,7 @@ const App = () => {
       </section>
 
       {/* AIアシスタント、アクセス、予約、フッター（変更なし） */}
+      {/* ... (以下のコードは先ほどと同じなので省略しますが、ファイルには残してください！) ... */}
       <section id="ai-assistant" className="py-20 bg-gradient-to-br from-[#E8ECD6] to-[#F5F5F0]">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
@@ -517,13 +518,13 @@ const App = () => {
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Home size={24} /><span className="font-bold tracking-widest text-sm">BASIC RATE</span></div>
               <p className="text-sm opacity-80 mb-1">一棟貸し（4名様まで）</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">25,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">10,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
               <p className="text-xs opacity-60">※シーズン・曜日により変動します</p>
             </div>
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Users size={24} /><span className="font-bold tracking-widest text-sm">EXTRA GUEST</span></div>
               <p className="text-sm opacity-80 mb-1">5名様以降の追加料金</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+3,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+5,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
               <p className="text-xs opacity-60">※最大8名様まで宿泊可能</p>
             </div>
           </div>
