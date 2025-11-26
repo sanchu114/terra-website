@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // 必要なアイコンをインポート
-import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee } from 'lucide-react';
+import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, Image as ImageIcon } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,17 +19,15 @@ const App = () => {
   // スライドショー関連のState
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  // 修正：拡張子を実際のファイルに合わせて修正しました
   const heroImages = [
-    "/assets/photos/hero1.jpg", // jpg
-    "/assets/photos/hero2.jpg", // jpg
-    "/assets/photos/hero3.png", // png
-    "/assets/photos/hero4.png", // png
+    "/assets/photos/hero1.jpg",
+    "/assets/photos/hero2.jpg",
+    "/assets/photos/hero3.png",
+    "/assets/photos/hero4.png",
   ];
 
   // スライドショーのタイマー設定
   useEffect(() => {
-    // 修正：5000ms(5秒) -> 8000ms(8秒) に変更して、もっとゆっくりに
     const intervalId = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
@@ -48,13 +46,13 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ナビゲーションリンク
+  // ナビゲーションリンク（ギャラリーを追加）
   const navLinks = [
     { name: 'コンセプト', href: '#concept' },
     { name: 'お部屋・設備', href: '#rooms' },
-    { name: '注意事項', href: '#notes' },
     { name: 'お食事', href: '#meals' },
-    { name: 'AIアシスタント', href: '#ai-assistant' },
+    { name: 'ギャラリー', href: '#gallery' }, // 追加
+    { name: '注意事項', href: '#notes' },
     { name: 'アクセス', href: '#access' },
     { name: 'ご予約', href: '#contact' },
   ];
@@ -67,8 +65,8 @@ const App = () => {
     setAiResponse('');
     setAiError('');
     
-    // APIキーの設定（ここにGoogle AI Studioで取得したキーを入れてください）
-    const apiKey = ""; 
+    // APIキーの設定
+    const apiKey = ""; // ★ここにご自身のAPIキーを入れてください（前回と同じもの）
     
     const systemPrompt = `
       あなたは愛媛県今治市伯方島にある簡易宿所「Terra（テラ）」のAIアシスタントです。
@@ -120,9 +118,6 @@ const App = () => {
       
       if (text) {
         setAiResponse(text);
-        setTimeout(() => {
-            aiResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 100);
       } else {
         setAiError('申し訳ありません。うまく回答を生成できませんでした。');
       }
@@ -153,7 +148,6 @@ const App = () => {
     }
   };
 
-  // 予約フォーム送信ハンドラ
   const handleBookingSubmit = (e) => {
     e.preventDefault();
     setFormStatus('submitting');
@@ -171,7 +165,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFCF8] text-stone-800 font-sans selection:bg-[#4A5D23] selection:text-white">
-      {/* React側でのフォーム設定（hidden） */}
+      {/* Netlify Forms用 Hidden Input */}
       <form name="booking" netlify="true" hidden>
         <input type="text" name="name" />
         <input type="email" name="email" />
@@ -189,7 +183,6 @@ const App = () => {
       >
         <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            {/* ロゴ画像 */}
             <img 
               src="/logo.png" 
               alt="Terra Logo" 
@@ -237,18 +230,15 @@ const App = () => {
         )}
       </header>
 
-      {/* ヒーローセクション（スライドショー実装） */}
+      {/* ヒーローセクション */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-stone-900">
-        {/* 背景画像スライドショー */}
         {heroImages.map((img, index) => (
           <div 
             key={index}
-            // 修正：切り替え時間 duration-[2000ms] -> [3000ms] にして、よりゆっくりフェードするように
             className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${
               index === currentImageIndex ? 'opacity-60' : 'opacity-0'
             }`}
           >
-            {/* ズームエフェクト */}
             <img 
               src={img} 
               alt={`Terra Slide ${index + 1}`} 
@@ -293,7 +283,7 @@ const App = () => {
             <div className="md:w-1/2">
               <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   <img src="/assets/photos/engawa.png" alt="Terraの縁側と庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                   <img src="/assets/photos/niwa.png" alt="Terraの庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 </div>
                 <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FDFCF8] p-4 hidden md:block">
                   <div className="w-full h-full border border-[#4A5D23] flex items-center justify-center text-[#4A5D23]">
@@ -405,7 +395,6 @@ const App = () => {
             <div className="md:w-1/2">
                <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   {/* 修正：ファイル名を bento.png に変更 */}
                    <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ（自炊イメージ）" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#F9FAF6] p-4 hidden md:block">
@@ -434,8 +423,45 @@ const App = () => {
         </div>
       </section>
 
-      {/* AIアシスタント、アクセス、予約、フッター（変更なし） */}
-      {/* ... (以下のコードは先ほどと同じなので省略しますが、ファイルには残してください！) ... */}
+      {/* 新規追加：ギャラリーセクション */}
+      <section id="gallery" className="py-20 bg-white">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="text-center mb-12">
+            <span className="text-[#4A5D23] font-bold tracking-widest text-sm">GALLERY</span>
+            <h2 className="text-3xl font-serif text-stone-800 mt-2">島の時間、Terraの記憶。</h2>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
+            {/* 画像をランダムっぽく配置（手持ちの画像をフル活用） */}
+            <div className="col-span-2 row-span-2 overflow-hidden rounded-sm relative group">
+              <img src="/assets/photos/hero1.jpg" alt="Gallery 1" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+              <img src="/assets/photos/niwa.png" alt="Gallery 2" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+               <img src="/assets/photos/bento.png" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+            <div className="col-span-1 row-span-2 overflow-hidden rounded-sm relative group">
+              <img src="/assets/photos/view.png" alt="Gallery 4" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+              <img src="/assets/photos/dining.png" alt="Gallery 5" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+            <div className="col-span-2 row-span-1 overflow-hidden rounded-sm relative group">
+               <img src="/assets/photos/engawa.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+               <img src="/assets/photos/hero2.jpg" alt="Gallery 7" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+               <img src="/assets/photos/exterior.png" alt="Gallery 8" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AIアシスタントセクション */}
       <section id="ai-assistant" className="py-20 bg-gradient-to-br from-[#E8ECD6] to-[#F5F5F0]">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
@@ -511,20 +537,20 @@ const App = () => {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif mb-6">ご予約・空室確認</h2>
-            <p className="opacity-90 leading-relaxed max-w-2xl mx-auto">公式サイトからのご予約が最もお得（ベストレート）です。<br/>手数料がかからない分、各予約サイト（Airbnb・じゃらん等）よりお安くご案内しております。</p>
+            <p className="opacity-90 leading-relaxed max-w-2xl mx-auto">公式サイトからのご予約が最もお得（ベストレート）です。<br/>手数料がかからない分、各予約サイトよりお安くご案内しております。</p>
           </div>
           
           <div className="mb-12 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Home size={24} /><span className="font-bold tracking-widest text-sm">BASIC RATE</span></div>
               <p className="text-sm opacity-80 mb-1">一棟貸し（4名様まで）</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">10,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">25,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
               <p className="text-xs opacity-60">※シーズン・曜日により変動します</p>
             </div>
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Users size={24} /><span className="font-bold tracking-widest text-sm">EXTRA GUEST</span></div>
               <p className="text-sm opacity-80 mb-1">5名様以降の追加料金</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+5,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+3,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
               <p className="text-xs opacity-60">※最大8名様まで宿泊可能</p>
             </div>
           </div>
