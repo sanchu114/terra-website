@@ -6,26 +6,43 @@
     <link rel="icon" href="%PUBLIC_URL%/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#2C3E28" />
+    
+    <!-- 基本情報 -->
+    <title>Terra -Shimanami- | 暮らすように泊まる</title>
     <meta
       name="description"
-      content="愛媛県今治市・伯方島の簡易宿所「Terra」。暮らすように泊まる、静かな大人の隠れ家です。"
+      content="愛媛県今治市・伯方島の簡易宿所「Terra」。静かな古民家で暮らすように泊まる、大人の隠れ家です。長期滞在・ワーケーション歓迎。"
     />
-    <title>Terra -Shimanami- | 暮らすように泊まる</title>
 
-    <!-- ★ここが修正ポイント：最新のTailwind CSSを読み込む魔法のスクリプト -->
+    <!-- SNS設定 (OGP) -->
+    <meta property="og:url" content="https://terra-shimanami.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Terra -Shimanami- | 暮らすように泊まる" />
+    <meta property="og:description" content="愛媛県今治市・伯方島の簡易宿所「Terra」。静かな古民家で暮らすように泊まる、大人の隠れ家です。" />
+    <meta property="og:site_name" content="Terra -Shimanami-" />
+    <!-- ★ここを変更しました：シェア画像 -->
+    <meta property="og:image" content="https://terra-shimanami.com/ogp.png" />
+    
+    <!-- Twitter設定 -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Terra -Shimanami- | 暮らすように泊まる" />
+    <meta name="twitter:description" content="しまなみ海道・伯方島の静かな古民家宿。長期滞在・ワーケーションに。" />
+    <!-- ★ここを変更しました：シェア画像 -->
+    <meta name="twitter:image" content="https://terra-shimanami.com/ogp.png" />
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- フォントの読み込み -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    
     <div id="root"></div>
 
-    <!-- Netlify Forms用ダミーフォーム -->
+    <!-- Netlify Forms -->
     <form name="booking" netlify netlify-honeypot="bot-field" hidden>
       <input type="text" name="name" />
       <input type="email" name="email" />
