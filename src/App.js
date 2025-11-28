@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // 必要なアイコンをインポート
-import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, Image as ImageIcon } from 'lucide-react';
+import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,11 +19,27 @@ const App = () => {
   // スライドショー関連のState
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
+  // ギャラリーモーダル関連のState
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
   const heroImages = [
     "/assets/photos/hero1.jpg",
     "/assets/photos/hero2.jpg",
     "/assets/photos/hero3.png",
     "/assets/photos/hero4.png",
+  ];
+  
+  // ギャラリー用画像のリスト
+  const galleryImages = [
+    "/assets/photos/hero1.jpg",
+    "/assets/photos/niwa.png",
+    "/assets/photos/bento.png",
+    "/assets/photos/view.png",
+    "/assets/photos/dining.png",
+    "/assets/photos/engawa.png",
+    "/assets/photos/hero2.jpg",
+    "/assets/photos/exterior.png",
   ];
 
   // スライドショーのタイマー設定
@@ -46,13 +62,39 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ナビゲーションリンク（ギャラリーを追加）
+  // モーダル操作関数
+  const openModal = (index) => {
+    setSelectedImageIndex(index);
+    setSelectedImage(galleryImages[index]);
+    document.body.style.overflow = 'hidden'; // 背景スクロール固定
+  };
+
+  const closeModal = () => {
+    setSelectedImage(null);
+    document.body.style.overflow = 'unset'; // 背景スクロール解除
+  };
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    const nextIndex = selectedImageIndex === galleryImages.length - 1 ? 0 : selectedImageIndex + 1;
+    setSelectedImageIndex(nextIndex);
+    setSelectedImage(galleryImages[nextIndex]);
+  };
+
+  const prevImage = (e) => {
+    e.stopPropagation();
+    const prevIndex = selectedImageIndex === 0 ? galleryImages.length - 1 : selectedImageIndex - 1;
+    setSelectedImageIndex(prevIndex);
+    setSelectedImage(galleryImages[prevIndex]);
+  };
+
+
   const navLinks = [
     { name: 'コンセプト', href: '#concept' },
     { name: 'お部屋・設備', href: '#rooms' },
-    { name: 'お食事', href: '#meals' },
-    { name: 'ギャラリー', href: '#gallery' }, // 追加
     { name: '注意事項', href: '#notes' },
+    { name: 'お食事', href: '#meals' },
+    { name: 'AIアシスタント', href: '#ai-assistant' },
     { name: 'アクセス', href: '#access' },
     { name: 'ご予約', href: '#contact' },
   ];
@@ -65,8 +107,7 @@ const App = () => {
     setAiResponse('');
     setAiError('');
     
-    // APIキーの設定
-    const apiKey = ""; // ★ここにご自身のAPIキーを入れてください（前回と同じもの）
+    const apiKey = ""; // ★APIキーはそのまま維持してください
     
     const systemPrompt = `
       あなたは愛媛県今治市伯方島にある簡易宿所「Terra（テラ）」のAIアシスタントです。
@@ -165,7 +206,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFCF8] text-stone-800 font-sans selection:bg-[#4A5D23] selection:text-white">
-      {/* Netlify Forms用 Hidden Input */}
       <form name="booking" netlify="true" hidden>
         <input type="text" name="name" />
         <input type="email" name="email" />
@@ -175,56 +215,60 @@ const App = () => {
         <textarea name="message"></textarea>
       </form>
 
-      {/* ヘッダー */}
-      <header 
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? 'bg-[#2C3E28] text-white shadow-md py-3' : 'bg-transparent text-white py-5'
-        }`}
-      >
-        <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <img 
-              src="/logo.png" 
-              alt="Terra Logo" 
-              className={`h-10 md:h-12 w-auto object-contain transition-all duration-300 ${scrolled ? 'brightness-0 invert' : ''}`} 
-            />
-          </div>
-
-          <nav className="hidden md:flex gap-8">
-            {navLinks.map((link) => (
-              <a 
-                key={link.name} 
-                href={link.href} 
-                className="text-sm tracking-wider hover:text-[#A8B692] transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
-          </nav>
+      {/* 画像拡大モーダル */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-fade-in"
+          onClick={closeModal}
+        >
+          <button 
+            className="absolute top-4 right-4 text-white/70 hover:text-white p-2"
+            onClick={closeModal}
+          >
+            <X size={32} />
+          </button>
 
           <button 
-            className="md:hidden p-2 text-white"
-            onClick={toggleMenu}
-            aria-label="メニューを開く"
+            className="absolute left-4 text-white/50 hover:text-white p-2 hidden md:block"
+            onClick={prevImage}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <ChevronLeft size={48} />
           </button>
-        </div>
 
-        {/* モバイルメニュー */}
+          <img 
+            src={selectedImage} 
+            alt="Enlarged view" 
+            className="max-w-full max-h-[90vh] object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()} // 画像クリックで閉じないようにする
+          />
+
+          <button 
+            className="absolute right-4 text-white/50 hover:text-white p-2 hidden md:block"
+            onClick={nextImage}
+          >
+            <ChevronRight size={48} />
+          </button>
+          
+          <div className="absolute bottom-4 text-white/60 text-sm tracking-widest">
+            {selectedImageIndex + 1} / {galleryImages.length}
+          </div>
+        </div>
+      )}
+
+      <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-[#2C3E28] text-white shadow-md py-3' : 'bg-transparent text-white py-5'}`}>
+        <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Terra Logo" className={`h-10 md:h-12 w-auto object-contain transition-all duration-300 ${scrolled ? 'brightness-0 invert' : ''}`} />
+          </div>
+          <nav className="hidden md:flex gap-8">
+            {navLinks.map((link) => (<a key={link.name} href={link.href} className="text-sm tracking-wider hover:text-[#A8B692] transition-colors">{link.name}</a>))}
+          </nav>
+          <button className="md:hidden p-2 text-white" onClick={toggleMenu} aria-label="メニューを開く">{isMenuOpen ? <X size={24} /> : <Menu size={24} />}</button>
+        </div>
         {isMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-[#2C3E28] border-t border-[#4A5D23] animate-fade-in">
             <div className="flex flex-col p-4">
-              {navLinks.map((link) => (
-                <a 
-                  key={link.name} 
-                  href={link.href} 
-                  className="py-3 text-white border-b border-[#4A5D23] last:border-none"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => (<a key={link.name} href={link.href} className="py-3 text-white border-b border-[#4A5D23] last:border-none" onClick={() => setIsMenuOpen(false)}>{link.name}</a>))}
             </div>
           </div>
         )}
@@ -233,34 +277,14 @@ const App = () => {
       {/* ヒーローセクション */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-stone-900">
         {heroImages.map((img, index) => (
-          <div 
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${
-              index === currentImageIndex ? 'opacity-60' : 'opacity-0'
-            }`}
-          >
-            <img 
-              src={img} 
-              alt={`Terra Slide ${index + 1}`} 
-              className={`w-full h-full object-cover transition-transform duration-[10000ms] ease-linear ${
-                index === currentImageIndex ? 'scale-110' : 'scale-100'
-              }`}
-            />
+          <div key={index} className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${index === currentImageIndex ? 'opacity-60' : 'opacity-0'}`}>
+            <img src={img} alt={`Terra Slide ${index + 1}`} className={`w-full h-full object-cover transition-transform duration-[10000ms] ease-linear ${index === currentImageIndex ? 'scale-110' : 'scale-100'}`} />
           </div>
         ))}
-        
         <div className="relative z-10 text-center px-4 text-white max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight drop-shadow-lg">
-            暮らすように、<br/>泊まる。
-          </h1>
-          <p className="text-base md:text-lg mb-12 leading-loose tracking-widest font-serif opacity-90 drop-shadow-md">
-            しまなみ海道・伯方島の山間にある一軒家。<br className="hidden md:block"/>
-            聞こえるのは、風の音と鳥の声だけ。<br className="hidden md:block"/>
-            何もしない時間を過ごすための、大人の隠れ家です。
-          </p>
-          <a href="#contact" className="inline-flex items-center gap-2 bg-[#4A5D23] hover:bg-[#3A4A1C] text-white px-8 py-3 rounded-sm transition-colors duration-300 tracking-widest text-sm shadow-lg">
-            ご予約・空室確認 <ArrowRight size={16} />
-          </a>
+          <h1 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight drop-shadow-lg">暮らすように、<br/>泊まる。</h1>
+          <p className="text-base md:text-lg mb-12 leading-loose tracking-widest font-serif opacity-90 drop-shadow-md">しまなみ海道・伯方島の山間にある一軒家。<br className="hidden md:block"/>聞こえるのは、風の音と鳥の声だけ。<br className="hidden md:block"/>何もしない時間を過ごすための、大人の隠れ家です。</p>
+          <a href="#contact" className="inline-flex items-center gap-2 bg-[#4A5D23] hover:bg-[#3A4A1C] text-white px-8 py-3 rounded-sm transition-colors duration-300 tracking-widest text-sm shadow-lg">ご予約・空室確認 <ArrowRight size={16} /></a>
         </div>
       </section>
 
@@ -270,15 +294,9 @@ const App = () => {
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="md:w-1/2 space-y-6">
               <span className="text-[#4A5D23] font-bold tracking-widest text-sm block mb-2">CONCEPT</span>
-              <h2 className="text-3xl md:text-4xl font-serif text-stone-800 leading-snug">
-                大地に還る時間。<br/>心ほどける、島の日常。
-              </h2>
-              <p className="text-stone-600 leading-relaxed">
-                Terra（テラ）はラテン語で「大地」を意味します。広い縁側でただ過ぎゆく時を感じ、窓辺のハンモックで微睡む。目の前に広がる里山の風景が、忙しい日常を忘れさせてくれます。
-              </p>
-              <p className="text-stone-600 leading-relaxed">
-                観光地化を避け、古民家を最低限リノベーションした素朴な空間です。過度なサービスはありませんが、長期の業務渡航やワーケーションなど、「生活の安定」と「静かな時間」を最優先する方に選ばれています。
-              </p>
+              <h2 className="text-3xl md:text-4xl font-serif text-stone-800 leading-snug">大地に還る時間。<br/>心ほどける、島の日常。</h2>
+              <p className="text-stone-600 leading-relaxed">Terra（テラ）はラテン語で「大地」を意味します。広い縁側でただ過ぎゆく時を感じ、窓辺のハンモックで微睡む。目の前に広がる里山の風景が、忙しい日常を忘れさせてくれます。</p>
+              <p className="text-stone-600 leading-relaxed">観光地化を避け、古民家を最低限リノベーションした素朴な空間です。過度なサービスはありませんが、長期の業務渡航やワーケーションなど、「生活の安定」と「静かな時間」を最優先する方に選ばれています。</p>
             </div>
             <div className="md:w-1/2">
               <div className="relative">
@@ -286,9 +304,7 @@ const App = () => {
                    <img src="/assets/photos/niwa.png" alt="Terraの庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 </div>
                 <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FDFCF8] p-4 hidden md:block">
-                  <div className="w-full h-full border border-[#4A5D23] flex items-center justify-center text-[#4A5D23]">
-                    <span className="font-serif italic">Est. 2024</span>
-                  </div>
+                  <div className="w-full h-full border border-[#4A5D23] flex items-center justify-center text-[#4A5D23]"><span className="font-serif italic">Est. 2024</span></div>
                 </div>
               </div>
             </div>
@@ -395,7 +411,7 @@ const App = () => {
             <div className="md:w-1/2">
                <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ（自炊イメージ）" className="w-full h-full object-cover" />
+                   <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#F9FAF6] p-4 hidden md:block">
                   <div className="w-full h-full border border-[#4A5D23] flex flex-col items-center justify-center text-[#4A5D23]">
@@ -423,7 +439,7 @@ const App = () => {
         </div>
       </section>
 
-      {/* 新規追加：ギャラリーセクション */}
+      {/* ギャラリーセクション */}
       <section id="gallery" className="py-20 bg-white">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-12">
@@ -432,30 +448,37 @@ const App = () => {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-            {/* 画像をランダムっぽく配置（手持ちの画像をフル活用） */}
-            <div className="col-span-2 row-span-2 overflow-hidden rounded-sm relative group">
+            <div className="col-span-2 row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(0)}>
               <img src="/assets/photos/hero1.jpg" alt="Gallery 1" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(1)}>
               <img src="/assets/photos/niwa.png" alt="Gallery 2" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(2)}>
                <img src="/assets/photos/bento.png" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-2 overflow-hidden rounded-sm relative group">
+            <div className="col-span-1 row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(3)}>
               <img src="/assets/photos/view.png" alt="Gallery 4" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(4)}>
               <img src="/assets/photos/dining.png" alt="Gallery 5" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-2 row-span-1 overflow-hidden rounded-sm relative group">
+            <div className="col-span-2 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(5)}>
                <img src="/assets/photos/engawa.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(6)}>
                <img src="/assets/photos/hero2.jpg" alt="Gallery 7" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group">
+             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(7)}>
                <img src="/assets/photos/exterior.png" alt="Gallery 8" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
           </div>
         </div>
@@ -537,20 +560,22 @@ const App = () => {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif mb-6">ご予約・空室確認</h2>
-            <p className="opacity-90 leading-relaxed max-w-2xl mx-auto">公式サイトからのご予約が最もお得（ベストレート）です。<br/>手数料がかからない分、各予約サイトよりお安くご案内しております。</p>
+            <p className="opacity-90 leading-relaxed max-w-2xl mx-auto">公式サイトからのご予約が最もお得（ベストレート）です。<br/>手数料がかからない分、各予約サイト（Airbnb・じゃらん等）よりお安くご案内しております。</p>
           </div>
           
           <div className="mb-12 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Home size={24} /><span className="font-bold tracking-widest text-sm">BASIC RATE</span></div>
               <p className="text-sm opacity-80 mb-1">一棟貸し（4名様まで）</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">25,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
+              {/* 修正：金額を変更しました */}
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">10,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
               <p className="text-xs opacity-60">※シーズン・曜日により変動します</p>
             </div>
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Users size={24} /><span className="font-bold tracking-widest text-sm">EXTRA GUEST</span></div>
               <p className="text-sm opacity-80 mb-1">5名様以降の追加料金</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+3,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
+              {/* 修正：金額を変更しました */}
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+5,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
               <p className="text-xs opacity-60">※最大8名様まで宿泊可能</p>
             </div>
           </div>
