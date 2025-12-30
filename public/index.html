@@ -2,7 +2,8 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <!-- ロゴ画像 -->
+    <link rel="icon" href="%PUBLIC_URL%/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#2C3E28" />
 
@@ -11,42 +12,44 @@
     <meta name="description" content="暮らすように、泊まる。愛媛県今治市、しまなみ海道・伯方島の山間にある一棟貸し古民家宿「Terra（テラ）」。静かな島時間と地元・山中商店の温かいお食事で、長期滞在やワーケーションに最適です。" />
     <meta name="keywords" content="伯方島, 宿泊, 古民家, 一棟貸し, しまなみ海道, 長期滞在, 山中商店, Terra, テラ" />
 
-    <!-- SNS（OGP）設定: シェアされた時の見た目 -->
+    <!-- SNS（OGP）設定 -->
     <meta property="og:title" content="簡易宿所 Terra -Shimanami- | 伯方島の古民家宿" />
     <meta property="og:description" content="風の音と鳥の声だけが聞こえる、大人の隠れ家。公式サイトからの予約が最安値です。" />
-    <meta property="og:image" content="https://terra-shimanami.com/assets/photos/hero1.jpg" />
+    <meta property="og:image" content="https://terra-shimanami.com/ogp.png" />
     <meta property="og:url" content="https://terra-shimanami.com/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://terra-shimanami.com/ogp.png" />
 
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!-- ★重要：Tailwind CSS の読み込み（デザイン崩れを直す魔法） -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Google Fonts 読み込み -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <!-- JavaScriptが無効な環境（クローラーなど）でも内容が見えるように、コア情報をここに配置 -->
+    <!-- JavaScriptが無効な環境（検索ロボットなど）向けの内容 -->
     <noscript>
-      <h1>簡易宿所 Terra -Shimanami-</h1>
-      <p>愛媛県今治市伯方町北浦甲1501-3</p>
-      <h2>コンセプト</h2>
-      <p>「暮らすように、泊まる。」しまなみ海道・伯方島の山間にある一軒家。何もしない時間を過ごすための、大人の隠れ家です。</p>
-      <h2>お部屋・設備</h2>
-      <p>4つの寝室、広いダイニングキッチン、高速Wi-Fi完備。長期滞在や業務利用にも最適です。</p>
-      <h2>お食事</h2>
-      <p>近隣の山中商店と連携し、手作りのお弁当や朝食をご用意しています。</p>
-      <p>詳細・ご予約はJavaScriptを有効にしてご覧ください。</p>
-    </noscript>
-
-    <div id="root">
-      <!-- Reactがロードされるまでの間、ここに重要なテキストを表示しておくことでSEO効果を高めます -->
-      <div style="display:none">
+      <div style="padding: 20px; font-family: sans-serif;">
         <h1>簡易宿所 Terra -Shimanami-</h1>
-        <p>しまなみ海道・伯方島の一棟貸し宿泊施設。静かな環境でのワーケーションや長期滞在に。</p>
+        <p>このサイトを正しく表示するにはJavaScriptを有効にしてください。</p>
+        <p>愛媛県今治市伯方町北浦甲1501-3</p>
+        <p>「暮らすように、泊まる。」しまなみ海道・伯方島の山間にある一棟貸し古民家宿。</p>
       </div>
-    </div>
+    </noscript>
+    
+    <div id="root"></div>
+
+    <!-- Netlify Forms -->
+    <form name="booking" netlify netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="date" name="checkin" />
+      <input type="date" name="checkout" />
+      <input type="number" name="guests" />
+      <textarea name="message"></textarea>
+    </form>
   </body>
 </html>
