@@ -439,7 +439,7 @@ const App = () => {
         </div>
       </section>
 
-      {/* ギャラリーセクション */}
+      {/* ギャラリーセクション（スマホ最適化） */}
       <section id="gallery" className="py-20 bg-white">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-12">
@@ -447,36 +447,47 @@ const App = () => {
             <h2 className="text-3xl font-serif text-stone-800 mt-2">島の時間、Terraの記憶。</h2>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]">
-            <div className="col-span-2 row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(0)}>
+          {/* 修正：スマホでは gap-2 で引き締め、md（PC）以上で gap-4 に */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 auto-rows-[160px] md:auto-rows-[200px]">
+            
+            {/* 1枚目：メインビジュアル（スマホは横長ドーン、PCは2x2の大きな正方形） */}
+            <div className="col-span-2 row-span-1 md:row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(0)}>
               <img src="/assets/photos/hero1.jpg" alt="Gallery 1" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(1)}>
+
+            {/* 2枚目以降：スマホは1x1の正方形タイルで整列、PCはBento Grid的に配置 */}
+            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(1)}>
               <img src="/assets/photos/niwa.png" alt="Gallery 2" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(2)}>
+            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(2)}>
                <img src="/assets/photos/bento.png" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(3)}>
+            
+            {/* ここはPCだと縦長、スマホだと正方形 */}
+            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(3)}>
               <img src="/assets/photos/view.png" alt="Gallery 4" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(4)}>
+            
+            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(4)}>
               <img src="/assets/photos/dining.png" alt="Gallery 5" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-            <div className="col-span-2 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(5)}>
+            
+            {/* ここはPCだと横長、スマホだと全幅（区切りとして） */}
+            <div className="col-span-2 md:col-span-2 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(5)}>
                <img src="/assets/photos/engawa.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(6)}>
+            
+             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(6)}>
                <img src="/assets/photos/hero2.jpg" alt="Gallery 7" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-             <div className="col-span-1 row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(7)}>
+             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(7)}>
                <img src="/assets/photos/exterior.png" alt="Gallery 8" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
@@ -567,14 +578,12 @@ const App = () => {
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Home size={24} /><span className="font-bold tracking-widest text-sm">BASIC RATE</span></div>
               <p className="text-sm opacity-80 mb-1">一棟貸し（4名様まで）</p>
-              {/* 修正：金額を変更しました */}
               <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">10,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
               <p className="text-xs opacity-60">※シーズン・曜日により変動します</p>
             </div>
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Users size={24} /><span className="font-bold tracking-widest text-sm">EXTRA GUEST</span></div>
               <p className="text-sm opacity-80 mb-1">5名様以降の追加料金</p>
-              {/* 修正：金額を変更しました */}
               <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">+5,000円 <span className="text-sm font-sans font-normal opacity-60">/ 名</span></div>
               <p className="text-xs opacity-60">※最大8名様まで宿泊可能</p>
             </div>
