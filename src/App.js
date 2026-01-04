@@ -553,6 +553,18 @@ const App = () => {
             <div className="w-full h-64 md:h-96 bg-stone-100 rounded-sm mb-8 overflow-hidden border border-stone-200 shadow-inner">
               <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15001.718766085127!2d133.08585290656603!3d34.21415511207934!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35504f003ea8ae61%3A0x9483beb05b1df249!2sTerra%20-Shimanami-!5e1!3m2!1sja!2sjp!4v1764070070196!5m2!1sja!2sjp" width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Terra Location Map"></iframe>
             </div>
+                        {/* ★新規追加：Googleマップで開くボタン（スマホ対策） */}
+            <div className="mb-8">
+              <a 
+                href="https://www.google.com/maps/search/?api=1&query=Terra+-Shimanami-" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-[#4A5D23] border border-[#4A5D23] px-6 py-2 rounded-full text-sm hover:bg-[#4A5D23] hover:text-white transition-colors"
+              >
+                <MapPin size={16} /> Googleマップアプリで見る
+              </a>
+              <p className="text-xs text-stone-400 mt-2">※地図が表示されない場合は上記ボタンをご利用ください</p>
+            </div>
             <div className="flex flex-col md:flex-row justify-center gap-8 text-left max-w-2xl mx-auto">
               <div className="flex-1">
                 <h4 className="font-bold text-stone-800 mb-2 border-b border-stone-300 pb-1">お車でお越しの方</h4>
@@ -638,7 +650,7 @@ const App = () => {
              <p className="text-sm opacity-80 mb-4">即時予約はこちら（OTAサイト）</p>
              <div className="flex justify-center gap-4 flex-wrap">
                <a href="https://www.airbnb.jp/rooms/1559396243936791784?source_impression_id=p3_1764072846_P34Mc5WDV_W3hHb-" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF5A5F] border border-[#FF5A5F] px-6 py-2 rounded-full text-sm hover:bg-[#FF5A5F] hover:text-white transition-colors"><ExternalLink size={16} /> Airbnb</a>
-               <a href="#" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF7500] border border-[#FF7500] px-6 py-2 rounded-full text-sm hover:bg-[#FF7500] hover:text-white transition-colors"><ExternalLink size={16} /> じゃらん</a>
+               <a href="https://www.jalan.net/yad315633/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF7500] border border-[#FF7500] px-6 py-2 rounded-full text-sm hover:bg-[#FF7500] hover:text-white transition-colors"><ExternalLink size={16} /> じゃらん</a>
              </div>
           </div>
         </div>
