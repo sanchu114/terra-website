@@ -342,8 +342,8 @@ const App = () => {
                     <p className="text-sm text-stone-600 mt-1">PC作業も可能な広いダイニングテーブル。IHコンロ（2口）、冷蔵庫、電子レンジ、調理器具一式を完備しており、地元の食材での自炊に最適です。</p>
                   </div>
                   <div className="border-l-2 border-[#4A5D23] pl-4">
-                    <h4 className="font-bold text-stone-800">2F くつろぎの寝室群</h4>
-                    <p className="text-sm text-stone-600 mt-1">セミダブルベッド2台、布団6組をご用意。最大8名様まで滞在可能です。窓辺にハンモックのある部屋や、静かに読書ができる洋室など、思い思いの場所でお過ごしください。</p>
+                    <h4 className="font-bold text-stone-800">2F くつろぎの寝室</h4>
+                    <p className="text-sm text-stone-600 mt-1">セミダブルベッド2台、布団6組をご用意。最大8名様まで滞在可能です。ハンモックのあるベランダや、静かに読書ができる洋室など、思い思いの場所でお過ごしください。</p>
                   </div>
                   <div className="border-l-2 border-[#4A5D23] pl-4">
                     <h4 className="font-bold text-stone-800">長期滞在の快適さ</h4>
@@ -590,7 +590,7 @@ const App = () => {
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
               <div className="inline-flex items-center justify-center gap-2 mb-3 text-[#A8B692]"><Home size={24} /><span className="font-bold tracking-widest text-sm">BASIC RATE</span></div>
               <p className="text-sm opacity-80 mb-1">一棟貸し（4名様まで）</p>
-              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">10,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
+              <div className="text-3xl font-sans font-medium tracking-widest text-white mb-2">20,000円〜 <span className="text-sm font-sans font-normal opacity-60">/ 泊</span></div>
               <p className="text-xs opacity-60">※シーズン・曜日により変動します</p>
             </div>
             <div className="bg-white/10 border border-white/20 p-6 rounded-sm text-center">
