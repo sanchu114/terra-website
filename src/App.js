@@ -20,6 +20,7 @@ const App = () => {
   const [priceInfo, setPriceInfo] = useState({ total: 0, nights: 0, isLongStay: false });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
+  // フォーム送信完了状態管理
   const [formStatus, setFormStatus] = useState(null); 
 
   // スライドショー & ギャラリー State
@@ -27,6 +28,7 @@ const App = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  // ヒーロー画像のリスト（拡張子が混在しているので注意）
   const heroImages = [
     "/assets/photos/hero1.jpg",
     "/assets/photos/hero2.jpg",
@@ -34,6 +36,7 @@ const App = () => {
     "/assets/photos/hero4.png",
   ];
   
+  // ギャラリー画像のリスト
   const galleryImages = [
     "/assets/photos/hero1.jpg",
     "/assets/photos/niwa.png",
@@ -71,10 +74,10 @@ const App = () => {
     }
 
     return () => {
-      clearInterval(intervalId);
+      // clearInterval(intervalId); // ここではintervalIdにアクセスできないため削除
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [heroImages.length]);
+  }, []);
 
   // 料金計算ロジック
   useEffect(() => {
@@ -150,7 +153,7 @@ const App = () => {
     setAiError('');
     
     // ★重要：ここにAPIキーを入れてください
-    const apiKey = ""; 
+    const apiKey = "AIzaSyB8KDbNYIYVgeFdU17XhOCM1oRSuTioXB0"; 
     
     const systemPrompt = `
       あなたは愛媛県今治市伯方島にある簡易宿所「Terra（テラ）」のAIアシスタントです。
@@ -280,6 +283,7 @@ const App = () => {
     setBookingData({ ...bookingData, [e.target.name]: e.target.value });
   };
   
+  // 通常の予約フォーム送信（決済を使わない場合や、JS無効時用）
   const handleBookingSubmit = (e) => {
     e.preventDefault();
     setFormStatus('submitting');
@@ -788,16 +792,20 @@ const App = () => {
             {/* カレンダーエリア */}
             <div className="p-6 md:p-8 bg-stone-50">
               <h3 className="font-bold text-lg mb-4 text-[#4A5D23] flex items-center gap-2"><CalendarCheck size={20} /> 空室状況</h3>
-              {/* 修正：文言を更新 */}
-              <p className="text-xs text-stone-500 mb-4">
-                空室状況の目安としてご覧ください（最新の空き状況はフォーム送信時に自動判定されます）。
-              </p>
+              <p className="text-xs text-stone-500 mb-4">空室状況の目安としてご覧ください（最新の空き状況はフォーム送信時に自動判定されます）。</p>
               <div className="aspect-[4/3] w-full bg-white border border-stone-200 rounded-sm overflow-hidden relative">
-                 <iframe src="https://calendar.google.com/calendar/embed?src=htreagrcn9d32sfdts0s49hhne40q41e%40import.calendar.google.com&ctz=Asia%2FTokyo" style={{ border: 0 }} width="100%" height="100%" frameBorder="0" scrolling="no" title="Terra Availability Calendar"></iframe>
+                 <iframe 
+                    src="https://calendar.google.com/calendar/embed?src=34be616fad496d75975b501fedd8982239235375b20c52a8502db3f22ef6e5cb@group.calendar.google.com&ctz=Asia%2FTokyo" 
+                    style={{ border: 0 }} 
+                    width="100%" 
+                    height="100%" 
+                    frameBorder="0" 
+                    scrolling="no" 
+                    title="Terra Availability Calendar">
+                 </iframe>
               </div>
               <div className="mt-4 text-xs text-stone-500 bg-white p-3 rounded border border-stone-100">
                 <strong>ご予約の流れ：</strong>
-                {/* 修正：文言を更新 */}
                 <ol className="list-decimal list-inside mt-1 space-y-1">
                   <li>右側のフォームから日付と人数を入力</li>
                   <li>自動計算された金額を確認して「支払いへ進む」</li>
@@ -808,7 +816,7 @@ const App = () => {
 
             {/* 予約フォームエリア */}
             <div className="p-6 md:p-8">
-              <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約リクエスト</h3>
+              <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約・見積もり</h3>
               
               {formStatus === 'success' ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
