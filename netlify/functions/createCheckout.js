@@ -7,21 +7,23 @@ const { addMinutes, parseISO, format, differenceInCalendarDays, isBefore, subMin
 const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN;
 const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID;
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
+// Netlify環境変数での改行コード対策
 const GOOGLE_PRIVATE_KEY = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
 const CAL_DIRECT_ID = process.env.CAL_DIRECT_ID; 
 const CAL_BLOCK_ID = process.env.CAL_BLOCK_ID;
 
-// Squareクライアント
+// Squareクライアント初期化
 const squareClient = new Client({
   accessToken: SQUARE_ACCESS_TOKEN,
   environment: Environment.Production, 
 });
 
-// 料金計算
+// 料金計算ロジック
 const calculatePrice = (checkin, checkout, guests) => {
   const start = new Date(checkin);
   const end = new Date(checkout);
   const nights = differenceInCalendarDays(end, start);
+
   if (nights < 1) throw new Error("宿泊日数が不正です");
   
   let totalBasePrice = 0;
@@ -29,21 +31,26 @@ const calculatePrice = (checkin, checkout, guests) => {
     let d = new Date(start);
     d.setDate(start.getDate() + i);
     const day = d.getDay();
-    if (day === 5 || day === 6 || day === 0) totalBasePrice += 30000;
-    else totalBasePrice += 20000;
+    // 金(5), 土(6), 日(0) は休前日料金 30,000円、それ以外は 20,000円
+    if (day === 5 || day === 6 || day === 0) {
+      totalBasePrice += 30000;
+    } else {
+      totalBasePrice += 20000;
+    }
   }
+
   const extraGuestPrice = guests > 4 ? (guests - 4) * 5000 * nights : 0;
   return { totalPrice: totalBasePrice + extraGuestPrice, nights };
 };
 
-// カレンダーお掃除機能（期限切れの仮押さえを削除）
+// カレンダーお掃除機能（期限切れの未払い仮押さえを削除）
 const cleanUpExpiredHolds = async (calendar) => {
   try {
     const now = new Date();
-    // 過去1時間のイベントを取得してチェック
+    // 過去24時間以内のイベントを取得してチェック
     const eventsRes = await calendar.events.list({
       calendarId: CAL_DIRECT_ID,
-      timeMin: subMinutes(now, 60).toISOString(),
+      timeMin: subMinutes(now, 1440).toISOString(), 
       singleEvents: true,
       q: "HOLD", // タイトルにHOLDが含まれるものを検索
     });
@@ -54,6 +61,7 @@ const cleanUpExpiredHolds = async (calendar) => {
       const match = event.description && event.description.match(/有効期限: (.*)/);
       if (match && match[1]) {
         const expireTime = new Date(match[1]);
+        // 現在時刻が有効期限を過ぎていたら削除
         if (isBefore(expireTime, now)) {
           console.log(`Deleting expired hold: ${event.summary}`);
           await calendar.events.delete({
@@ -69,42 +77,61 @@ const cleanUpExpiredHolds = async (calendar) => {
 };
 
 exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
 
   try {
     const data = JSON.parse(event.body);
     const { checkin, checkout, guests, name, email, message } = data;
 
+    if (!checkin || !checkout || !guests || !name || !email) {
+      return { statusCode: 400, body: JSON.stringify({ message: "入力内容に不備があります。" }) };
+    }
+
     // 1. 料金計算
     const { totalPrice, nights } = calculatePrice(checkin, checkout, guests);
     if (nights >= 5) {
-      return { statusCode: 400, body: JSON.stringify({ message: "5泊以上の長期滞在はお問い合わせください。" }) };
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "5泊以上の長期滞在は割引がありますので、お問い合わせフォームからご連絡ください。" }),
+      };
     }
 
-    // 2. Googleカレンダー認証 & お掃除
-    const jwtClient = new google.auth.JWT(GOOGLE_CLIENT_EMAIL, null, GOOGLE_PRIVATE_KEY, ['https://www.googleapis.com/auth/calendar']);
+    // 2. Googleカレンダー認証
+    const jwtClient = new google.auth.JWT(
+      GOOGLE_CLIENT_EMAIL,
+      null,
+      GOOGLE_PRIVATE_KEY,
+      ['https://www.googleapis.com/auth/calendar']
+    );
     await jwtClient.authorize();
     const calendar = google.calendar({ version: 'v3', auth: jwtClient });
-    
-    await cleanUpExpiredHolds(calendar); // 先にお掃除
 
-    // 3. 空き状況確認
-    const freeBusyRes = await calendar.freebusy.query({
+    // 3. お掃除実行（新しい予約を入れる前にゴミを消す）
+    await cleanUpExpiredHolds(calendar);
+
+    // 4. 空き状況確認 (FreeBusy)
+    const freeBusyResponse = await calendar.freebusy.query({
       requestBody: {
         timeMin: new Date(checkin).toISOString(),
         timeMax: new Date(checkout).toISOString(),
         items: [{ id: CAL_DIRECT_ID }, { id: CAL_BLOCK_ID }]
       }
     });
-    const busyDirect = freeBusyRes.data.calendars[CAL_DIRECT_ID]?.busy || [];
-    const busyBlock = freeBusyRes.data.calendars[CAL_BLOCK_ID]?.busy || [];
+    
+    const calendars = freeBusyResponse.data.calendars;
+    const busyDirect = calendars[CAL_DIRECT_ID]?.busy || [];
+    const busyBlock = calendars[CAL_BLOCK_ID]?.busy || [];
 
     if (busyDirect.length > 0 || busyBlock.length > 0) {
-      return { statusCode: 409, body: JSON.stringify({ message: "申し訳ありません。選択された日程は既に埋まっています。" }) };
+      return {
+        statusCode: 409, 
+        body: JSON.stringify({ message: "申し訳ありません。選択された日程は既に埋まっています。" }),
+      };
     }
 
-    // 4. Square顧客作成 (または検索)
-    // 簡易的に毎回新規作成とします（厳密な重複チェックは省略）
+    // 5. Square顧客作成 (または検索)
     const customerRes = await squareClient.customersApi.createCustomer({
       givenName: name,
       emailAddress: email,
@@ -112,7 +139,7 @@ exports.handler = async (event) => {
     });
     const customerId = customerRes.result.customer.id;
 
-    // 5. Square注文作成
+    // 6. Square注文作成
     const orderRes = await squareClient.ordersApi.createOrder({
       order: {
         locationId: SQUARE_LOCATION_ID,
@@ -120,36 +147,39 @@ exports.handler = async (event) => {
         lineItems: [{
           name: `Terra宿泊費 (${checkin}〜 ${nights}泊 ${guests}名)`,
           quantity: '1',
-          basePriceMoney: { amount: BigInt(totalPrice), currency: 'JPY' }
+          basePriceMoney: {
+            amount: BigInt(totalPrice),
+            currency: 'JPY'
+          }
         }]
       },
       idempotencyKey: uuidv4()
     });
     const orderId = orderRes.result.order.id;
 
-    // 6. Square請求書作成 & 送信
-    // 期限は翌日の同じ時間まで（24時間）
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 1);
-    const dueDateString = dueDate.toISOString().split('T')[0];
+    // 7. Square請求書作成
+    const dueDate = addMinutes(new Date(), 60); // 1時間後
+    const dueDateString = dueDate.toISOString().split('T')[0]; 
 
     const invoiceRes = await squareClient.invoicesApi.createInvoice({
       invoice: {
         locationId: SQUARE_LOCATION_ID,
         orderId: orderId,
-        primaryRecipient: { customerId: customerId },
+        primaryRecipient: {
+          customerId: customerId,
+        },
         paymentRequests: [{
           requestType: 'BALANCE',
-          dueDate: dueDateString,
+          dueDate: dueDateString, 
           automaticPaymentSource: 'NONE',
           reminders: [{
-            relativeScheduledDays: -1, // 期限1日前にリマインド（即時送信に近い効果）
-            message: "ご予約ありがとうございます。お支払いの完了をもって予約確定となります。"
+            relativeScheduledDays: -1, 
+            message: "ご予約ありがとうございます。本メールより決済をお願いいたします。"
           }]
         }],
-        deliveryMethod: 'EMAIL', // メールで送る
+        deliveryMethod: 'EMAIL', 
         title: '【Terra】ご宿泊代金のお支払い',
-        description: `ご予約ありがとうございます。\n宿泊日: ${checkin} 〜 ${checkout} (${nights}泊)\n人数: ${guests}名\n\n本メールの「カードで支払う」ボタンより決済をお願いいたします。\n決済完了後に、当日の入室方法やハウスルールをお送りいたします。`,
+        description: `ご予約ありがとうございます。\n宿泊日: ${checkin} 〜 ${checkout} (${nights}泊)\n人数: ${guests}名\n\n本メールの「カードで支払う」ボタンより決済をお願いいたします。\n\n※決済完了をもって予約確定となります。\n※確定後、当日の入室方法やハウスルールを別途メールにてお送りいたします。`,
         acceptedPaymentMethods: {
           card: true,
           squareGiftCard: false,
@@ -159,39 +189,43 @@ exports.handler = async (event) => {
       idempotencyKey: uuidv4()
     });
     
-    const invoiceId = invoiceRes.result.invoice.id;
+    // ★修正ポイント：作成された請求書のIDだけでなく、バージョン番号も取得する
+    const invoice = invoiceRes.result.invoice;
+    const invoiceId = invoice.id;
+    const invoiceVersion = invoice.version;
     
     // 請求書を「公開（送信）」する
+    // ★修正ポイント：バージョン番号を含めて送信リクエストを送る
     await squareClient.invoicesApi.publishInvoice(invoiceId, {
+      version: invoiceVersion, // これがないとエラーになります
       idempotencyKey: uuidv4()
     });
 
-    // 7. Googleカレンダーに仮押さえ作成
-    const holdExpiresAt = addMinutes(new Date(), 60); // カレンダー上は余裕を持って
-    const description = `【未払い・請求書送信済】\nゲスト: ${name} (${email})\n請求書ID: ${invoiceId}\n\n※支払いが完了するとSquareから通知が来ます。`;
+    // 8. Googleカレンダーに仮押さえ作成
+    const eventDescription = `【未払い・請求書送信済】\nゲスト: ${name} (${email})\n人数: ${guests}名\n合計: ¥${totalPrice.toLocaleString()}\n有効期限: ${dueDate.toISOString()}\n請求書ID: ${invoiceId}\n\n※支払いが完了するとSquareから通知が来ます。`;
     
     await calendar.events.insert({
       calendarId: CAL_DIRECT_ID,
       requestBody: {
         summary: `HOLD - ${name}様 (請求書送付済)`,
-        description: description,
+        description: eventDescription,
         start: { date: checkin },
         end: { date: checkout },
-        colorId: '8' // グレー
-      }
+        colorId: '8', // グレー
+      },
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Reserve Success" }),
+      body: JSON.stringify({ message: "Invoice sent successfully" }),
     };
 
   } catch (error) {
     console.error("Server Error:", error);
-    // エラー内容を返す（デバッグ用）
+    // エラーオブジェクトを文字列化して返す
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: "予約処理中にエラーが発生しました: " + error.message }),
+      body: JSON.stringify({ message: "予約処理中にエラーが発生しました: " + (error.message || JSON.stringify(error)) }),
     };
   }
 };
