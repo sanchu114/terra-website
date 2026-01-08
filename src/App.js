@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 // 必要なアイコンをインポート
-import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, ChevronLeft, ChevronRight, CreditCard, Loader } from 'lucide-react';
+import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, ChevronLeft, ChevronRight, CreditCard, Loader, Send } from 'lucide-react';
 
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,7 +20,8 @@ const App = () => {
   const [priceInfo, setPriceInfo] = useState({ total: 0, nights: 0, isLongStay: false });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
-  // フォーム送信完了状態管理
+  
+  // フォーム送信ステータス: null -> submitting -> success_invoice (請求書送信完了) -> success_inquiry (問い合わせ完了)
   const [formStatus, setFormStatus] = useState(null); 
 
   // スライドショー & ギャラリー State
@@ -66,7 +67,7 @@ const App = () => {
     };
     window.addEventListener('scroll', handleScroll);
     
-    // 決済完了で戻ってきた場合の処理
+    // 決済完了で戻ってきた場合の処理（念のため残す）
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success') {
       alert('お支払いが完了しました！予約確定メールをお送りしますのでお待ちください。\n（カレンダーへの反映には時間がかかる場合があります）');
@@ -74,7 +75,6 @@ const App = () => {
     }
 
     return () => {
-      // clearInterval(intervalId); // ここではintervalIdにアクセスできないため削除
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -169,7 +169,7 @@ const App = () => {
          - 山中商店では、手作りのお弁当や朝食の注文が可能（要予約・別料金）。母の味でボリューム満点。
          - 外食なら「伯方島には夜遅くまでやっている店が少ない」と伝え、ランチなら「さんわ（ラーメン）」「お好み焼き」などを提案。
       2. 観光・リフレッシュ:
-         - 派手な観光地ではなく「開山公園（桜・展望）」「船折瀬戸（潮流）」など自然スポットを推す。
+         - 「開山公園（桜・展望）」「船折瀬戸（潮流）」など自然スポットを推す。
          - 「ドルフィンファーム」などのメジャーどころも聞かれたら答える。
       3. レシピ提案:
          - 山中商店で買える「豚肉」「キャベツ」「卵」「もやし」などを使った、フライパン一つでできる男飯や、疲れた体に優しいスープなどを提案。
@@ -239,11 +239,27 @@ const App = () => {
     }
   };
 
+  // ★修正：請求書発行処理
   const handleCheckout = async (e) => {
     e.preventDefault();
     setCheckoutLoading(true);
     setCheckoutError('');
 
+    // 1. Netlify Formsへ通知（オーナーへの通知用として裏側で送る）
+    // ※これをやっておくとNetlifyの管理画面にもログが残る
+    const form = e.target;
+    const formData = new FormData(form);
+    try {
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formData).toString(),
+      });
+    } catch (err) {
+      console.error("Notification Error:", err);
+    }
+
+    // 2. 請求書発行プログラム実行
     try {
       const response = await fetch('/.netlify/functions/createCheckout', {
         method: 'POST',
@@ -257,15 +273,18 @@ const App = () => {
         throw new Error(result.message || '予約処理に失敗しました');
       }
 
-      window.location.href = result.paymentUrl;
+      // ★成功したら画面を切り替える（リダイレクトしない）
+      setFormStatus('success_invoice');
+      setCheckoutLoading(false);
 
     } catch (error) {
       console.error(error);
-      setCheckoutError(error.message);
+      setCheckoutError(error.message || "予期せぬエラーが発生しました");
       setCheckoutLoading(false);
     }
   };
   
+  // 長期滞在用問い合わせ送信
   const handleInquirySubmit = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -275,29 +294,16 @@ const App = () => {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(data).toString(),
     })
-    .then(() => alert("お問い合わせありがとうございます。長期滞在割引についてメールでご連絡いたします。"))
-    .catch((error) => alert(error));
+    .then(() => setFormStatus('success_inquiry'))
+    .catch((error) => alert("送信エラーが発生しました"));
   };
 
   const handleChange = (e) => {
     setBookingData({ ...bookingData, [e.target.name]: e.target.value });
   };
   
-  // 通常の予約フォーム送信（決済を使わない場合や、JS無効時用）
-  const handleBookingSubmit = (e) => {
-    e.preventDefault();
-    setFormStatus('submitting');
-    
-    const formData = new FormData(e.target);
-    
-    fetch('/', {
-      method: 'POST',
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(formData).toString()
-    })
-    .then(() => setFormStatus('success'))
-    .catch((error) => setFormStatus('error'));
-  };
+  // 今日日付
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-[#FDFCF8] text-stone-800 font-sans selection:bg-[#4A5D23] selection:text-white">
@@ -792,10 +798,12 @@ const App = () => {
             {/* カレンダーエリア */}
             <div className="p-6 md:p-8 bg-stone-50">
               <h3 className="font-bold text-lg mb-4 text-[#4A5D23] flex items-center gap-2"><CalendarCheck size={20} /> 空室状況</h3>
-              <p className="text-xs text-stone-500 mb-4">空室状況の目安としてご覧ください（最新の空き状況はフォーム送信時に自動判定されます）。</p>
+              <p className="text-xs text-stone-500 mb-4">
+                空室状況の目安としてご覧ください（最新の空き状況はフォーム送信時に自動判定されます）。
+              </p>
               <div className="aspect-[4/3] w-full bg-white border border-stone-200 rounded-sm overflow-hidden relative">
                  <iframe 
-                    src="https://calendar.google.com/calendar/embed?src=34be616fad496d75975b501fedd8982239235375b20c52a8502db3f22ef6e5cb@group.calendar.google.com&ctz=Asia%2FTokyo" 
+                    src="https://calendar.google.com/calendar/embed?src=（あなたの新しいカレンダーID）@group.calendar.google.com&ctz=Asia%2FTokyo" 
                     style={{ border: 0 }} 
                     width="100%" 
                     height="100%" 
@@ -809,20 +817,40 @@ const App = () => {
                 <ol className="list-decimal list-inside mt-1 space-y-1">
                   <li>右側のフォームから日付と人数を入力</li>
                   <li>自動計算された金額を確認して「支払いへ進む」</li>
-                  <li>Square（安全な決済サイト）でカード決済して予約確定</li>
+                  <li>入力アドレスに届く<strong>請求書メールから決済</strong>して予約確定</li>
                 </ol>
               </div>
             </div>
 
             {/* 予約フォームエリア */}
             <div className="p-6 md:p-8">
-              <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約・見積もり</h3>
+              <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約リクエスト</h3>
               
-              {formStatus === 'success' ? (
+              {formStatus === 'success_invoice' ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
                   <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4"><CheckCircle size={32} /></div>
-                  <h4 className="text-xl font-bold mb-2">リクエスト送信完了</h4>
-                  <p className="text-stone-600">お問い合わせありがとうございます。<br/>内容を確認し、24時間以内にメールにて<br/>ご連絡させていただきます。</p>
+                  <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">予約リクエスト送信完了</h4>
+                  <p className="text-stone-600 mb-4">
+                    ご入力いただいたメールアドレスに<br/>
+                    <strong>【Terra】ご宿泊代金のお支払い</strong><br/>
+                    という件名のメールを送信しました。
+                  </p>
+                  <p className="text-sm text-stone-500 bg-stone-100 p-3 rounded text-left">
+                    メール内のリンクからカード決済を完了してください。<br/>
+                    <strong>決済完了をもって予約確定となります。</strong><br/>
+                    ※1時間以内に決済されない場合、仮予約は自動キャンセルとなります。<br/>
+                    ※決済完了後、オーナーよりハウスルール等をお送りします。
+                  </p>
+                  <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
+                </div>
+              ) : formStatus === 'success_inquiry' ? (
+                <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
+                  <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4"><Mail size={32} /></div>
+                  <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">お問い合わせ送信完了</h4>
+                  <p className="text-stone-600">
+                    お問い合わせありがとうございます。<br/>
+                    長期滞在割引について、24時間以内にメールにて<br/>ご連絡させていただきます。
+                  </p>
                   <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
                 </div>
               ) : (
@@ -838,11 +866,25 @@ const App = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-stone-500 mb-1">チェックイン</label>
-                      <input type="date" name="checkin" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" />
+                      <input 
+                        type="date" 
+                        name="checkin" 
+                        required 
+                        min={today} // 今日以降のみ
+                        onChange={handleChange} 
+                        className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" 
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-stone-500 mb-1">チェックアウト</label>
-                      <input type="date" name="checkout" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" />
+                      <input 
+                        type="date" 
+                        name="checkout" 
+                        required 
+                        min={bookingData.checkin || today} // チェックイン日以降のみ
+                        onChange={handleChange} 
+                        className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" 
+                      />
                     </div>
                   </div>
 
@@ -903,12 +945,12 @@ const App = () => {
                     ) : priceInfo.isLongStay ? (
                       <>お問い合わせ（長期割引） <Mail size={18}/></>
                     ) : (
-                      <>予約して支払う（Square） <CreditCard size={18}/></>
+                      <>支払いへ進む（請求書を送る） <Send size={18}/></>
                     )}
                   </button>
                   
                   <p className="text-[10px] text-center text-stone-400">
-                    {priceInfo.isLongStay ? "※長期滞在のご相談として送信されます" : "※安全なSquare決済ページへ移動します"}
+                    {priceInfo.isLongStay ? "※長期滞在のご相談として送信されます" : "※メールでSquareの決済リンクをお送りします"}
                   </p>
                 </form>
               )}
