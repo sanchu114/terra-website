@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, ChevronLeft, ChevronRight, CreditCard, Loader, Send } from 'lucide-react';
 
 const App = () => {
+  const BOOKING_PAUSED = true; // ←いまはtrue。再開するときfalse
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
@@ -743,6 +744,7 @@ const App = () => {
       </section>
 
       {/* 予約・お問い合わせセクション */}
+      
       <section id="contact" className="py-20 bg-[#2C3E28] text-white">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
@@ -793,7 +795,19 @@ const App = () => {
               </div>
             </div>
           </div>
-
+          {BOOKING_PAUSED ? (
+  <div className="bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl p-6 md:p-10">
+    <div className="text-center">
+      <h3 className="text-xl md:text-2xl font-bold text-[#4A5D23] mb-3">
+        公式サイトからの予約受付を一時停止しています
+      </h3>
+      <p className="text-stone-600 leading-relaxed">
+        システム調整のため、ただいま公式サイトの予約フォーム・空室カレンダーは停止中です。<br />
+        ご予約は下のボタンから Airbnb / じゃらん をご利用ください。
+      </p>
+    </div>
+  </div>
+) : (
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl">
             {/* カレンダーエリア */}
             <div className="p-6 md:p-8 bg-stone-50">
@@ -956,7 +970,7 @@ const App = () => {
               )}
             </div>
           </div>
-          
+          )}
           <div className="mt-12 text-center">
              <p className="text-sm opacity-80 mb-4">即時予約はこちら（OTAサイト）</p>
              <div className="flex justify-center gap-4 flex-wrap">
