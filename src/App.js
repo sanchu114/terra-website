@@ -3,10 +3,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, ChevronLeft, ChevronRight, CreditCard, Loader, Send } from 'lucide-react';
 
 const App = () => {
-  const BOOKING_PAUSED = true; // ←いまはtrue。再開するときfalse
+  const BOOKING_PAUSED = false; // ←いまはtrue。再開するときfalse
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  
+
   // AI関連のState
   const [aiInput, setAiInput] = useState('');
   const [aiResponse, setAiResponse] = useState('');
@@ -21,9 +21,9 @@ const App = () => {
   const [priceInfo, setPriceInfo] = useState({ total: 0, nights: 0, isLongStay: false });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
-  
+
   // フォーム送信ステータス: null -> submitting -> success_invoice (請求書送信完了) -> success_inquiry (問い合わせ完了)
-  const [formStatus, setFormStatus] = useState(null); 
+  const [formStatus, setFormStatus] = useState(null);
 
   // スライドショー & ギャラリー State
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -37,7 +37,7 @@ const App = () => {
     "/assets/photos/hero3.png",
     "/assets/photos/hero4.png",
   ];
-  
+
   // ギャラリー画像のリスト
   const galleryImages = [
     "/assets/photos/hero1.jpg",
@@ -53,10 +53,10 @@ const App = () => {
   // スライドショーのタイマー設定
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => 
+      setCurrentImageIndex((prevIndex) =>
         prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 8000); 
+    }, 8000);
 
     return () => clearInterval(intervalId);
   }, [heroImages.length]);
@@ -67,7 +67,7 @@ const App = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
-    
+
     // 決済完了で戻ってきた場合の処理（念のため残す）
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success') {
@@ -113,12 +113,12 @@ const App = () => {
   const openModal = (index) => {
     setSelectedImageIndex(index);
     setSelectedImage(galleryImages[index]);
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
   };
 
   const closeModal = () => {
     setSelectedImage(null);
-    document.body.style.overflow = 'unset'; 
+    document.body.style.overflow = 'unset';
   };
 
   const nextImage = (e) => {
@@ -152,52 +152,18 @@ const App = () => {
     setIsAiLoading(true);
     setAiResponse('');
     setAiError('');
-    
-    // ★重要：ここにAPIキーを入れてください
-    const apiKey = "AIzaSyB8KDbNYIYVgeFdU17XhOCM1oRSuTioXB0"; 
-    
-    const systemPrompt = `
-      あなたは愛媛県今治市伯方島にある簡易宿所「Terra（テラ）」のAIアシスタントです。
-      
-      【Terraのコンセプト】
-      - 「暮らすように泊まる」静かな大人の隠れ家。
-      - 住所：愛媛県今治市伯方町北浦甲1501−3
-      - 近くの店：山中商店（徒歩圏内・食材あり）、コンビニ（車5分）、道の駅マリンオアシスはかた（車10分）
-      
-      【回答のためのカンペ（知識ベース）】
-      1. 買い物・食事:
-         - 基本は「山中商店」で食材を買って自炊を推奨。
-         - 山中商店では、手作りのお弁当や朝食の注文が可能（要予約・別料金）。母の味でボリューム満点。
-         - 外食なら「伯方島には夜遅くまでやっている店が少ない」と伝え、ランチなら「さんわ（ラーメン）」「お好み焼き」などを提案。
-      2. 観光・リフレッシュ:
-         - 「開山公園（桜・展望）」「船折瀬戸（潮流）」など自然スポットを推す。
-         - 「ドルフィンファーム」などのメジャーどころも聞かれたら答える。
-      3. レシピ提案:
-         - 山中商店で買える「豚肉」「キャベツ」「卵」「もやし」などを使った、フライパン一つでできる男飯や、疲れた体に優しいスープなどを提案。
-      
-      【トーン＆マナー】
-      - 落ち着いていて、少し詩的で丁寧なトーン。
-      - 「〜です、〜ます」調。
-      - 嘘はつかない。分からないことは「管理人にメールで聞いてみてください」と促す。
-    `;
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-    const payload = {
-      contents: [{ parts: [{ text: promptText }] }],
-      systemInstruction: { parts: [{ text: systemPrompt }] }
-    };
 
     try {
       const fetchWithRetry = async (retries = 3, delay = 1000) => {
         try {
-          const response = await fetch(url, {
+          const response = await fetch('/.netlify/functions/chatWithAI', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ promptText })
           });
-          if (!response.ok) throw new Error(`API Error: ${response.status}`);
-          return await response.json();
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || `API Error: ${response.status}`);
+          return data;
         } catch (error) {
           if (retries === 0) throw error;
           await new Promise(resolve => setTimeout(resolve, delay));
@@ -207,7 +173,7 @@ const App = () => {
 
       const data = await fetchWithRetry();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
+
       if (text) {
         setAiResponse(text);
       } else {
@@ -216,7 +182,7 @@ const App = () => {
 
     } catch (error) {
       console.error(error);
-      setAiError('通信エラーが発生しました。');
+      setAiError(error.message || '通信エラーが発生しました。');
     } finally {
       setIsAiLoading(false);
     }
@@ -284,7 +250,7 @@ const App = () => {
       setCheckoutLoading(false);
     }
   };
-  
+
   // 長期滞在用問い合わせ送信
   const handleInquirySubmit = (e) => {
     e.preventDefault();
@@ -295,14 +261,14 @@ const App = () => {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(data).toString(),
     })
-    .then(() => setFormStatus('success_inquiry'))
-    .catch((error) => alert("送信エラーが発生しました"));
+      .then(() => setFormStatus('success_inquiry'))
+      .catch((error) => alert("送信エラーが発生しました"));
   };
 
   const handleChange = (e) => {
     setBookingData({ ...bookingData, [e.target.name]: e.target.value });
   };
-  
+
   // 今日日付
   const today = new Date().toISOString().split('T')[0];
 
@@ -320,38 +286,38 @@ const App = () => {
 
       {/* 画像拡大モーダル */}
       {selectedImage && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-fade-in"
           onClick={closeModal}
         >
-          <button 
+          <button
             className="absolute top-4 right-4 text-white/70 hover:text-white p-2"
             onClick={closeModal}
           >
             <X size={32} />
           </button>
 
-          <button 
+          <button
             className="absolute left-4 text-white/50 hover:text-white p-2 hidden md:block"
             onClick={prevImage}
           >
             <ChevronLeft size={48} />
           </button>
 
-          <img 
-            src={selectedImage} 
-            alt="Enlarged view" 
+          <img
+            src={selectedImage}
+            alt="Enlarged view"
             className="max-w-full max-h-[90vh] object-contain shadow-2xl"
-            onClick={(e) => e.stopPropagation()} 
+            onClick={(e) => e.stopPropagation()}
           />
 
-          <button 
+          <button
             className="absolute right-4 text-white/50 hover:text-white p-2 hidden md:block"
             onClick={nextImage}
           >
             <ChevronRight size={48} />
           </button>
-          
+
           <div className="absolute bottom-4 text-white/60 text-sm tracking-widest">
             {selectedImageIndex + 1} / {galleryImages.length}
           </div>
@@ -359,25 +325,24 @@ const App = () => {
       )}
 
       {/* ヘッダー */}
-      <header 
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? 'bg-[#2C3E28] text-white shadow-md py-3' : 'bg-transparent text-white py-5'
-        }`}
+      <header
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-[#2C3E28] text-white shadow-md py-3' : 'bg-transparent text-white py-5'
+          }`}
       >
         <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <img 
-              src="/logo.png" 
-              alt="Terra Logo" 
-              className={`h-10 md:h-12 w-auto object-contain transition-all duration-300 ${scrolled ? 'brightness-0 invert' : ''}`} 
+            <img
+              src="/logo.png"
+              alt="Terra Logo"
+              className={`h-10 md:h-12 w-auto object-contain transition-all duration-300 ${scrolled ? 'brightness-0 invert' : ''}`}
             />
           </div>
 
           <nav className="hidden md:flex gap-8">
             {navLinks.map((link) => (
-              <a 
-                key={link.name} 
-                href={link.href} 
+              <a
+                key={link.name}
+                href={link.href}
                 className="text-sm tracking-wider hover:text-[#A8B692] transition-colors"
               >
                 {link.name}
@@ -385,7 +350,7 @@ const App = () => {
             ))}
           </nav>
 
-          <button 
+          <button
             className="md:hidden p-2 text-white"
             onClick={toggleMenu}
             aria-label="メニューを開く"
@@ -399,9 +364,9 @@ const App = () => {
           <div className="md:hidden absolute top-full left-0 w-full bg-[#2C3E28] border-t border-[#4A5D23] animate-fade-in">
             <div className="flex flex-col p-4">
               {navLinks.map((link) => (
-                <a 
-                  key={link.name} 
-                  href={link.href} 
+                <a
+                  key={link.name}
+                  href={link.href}
                   className="py-3 text-white border-b border-[#4A5D23] last:border-none"
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -416,29 +381,27 @@ const App = () => {
       {/* ヒーローセクション */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-stone-900">
         {heroImages.map((img, index) => (
-          <div 
+          <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${
-              index === currentImageIndex ? 'opacity-60' : 'opacity-0'
-            }`}
-          >
-            <img 
-              src={img} 
-              alt={`Terra Slide ${index + 1}`} 
-              className={`w-full h-full object-cover transition-transform duration-[10000ms] ease-linear ${
-                index === currentImageIndex ? 'scale-110' : 'scale-100'
+            className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${index === currentImageIndex ? 'opacity-60' : 'opacity-0'
               }`}
+          >
+            <img
+              src={img}
+              alt={`Terra Slide ${index + 1}`}
+              className={`w-full h-full object-cover transition-transform duration-[10000ms] ease-linear ${index === currentImageIndex ? 'scale-110' : 'scale-100'
+                }`}
             />
           </div>
         ))}
-        
+
         <div className="relative z-10 text-center px-4 text-white max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight drop-shadow-lg">
-            暮らすように、<br/>泊まる。
+            暮らすように、<br />泊まる。
           </h1>
           <p className="text-base md:text-lg mb-12 leading-loose tracking-widest font-serif opacity-90 drop-shadow-md">
-            しまなみ海道・伯方島の山間にある一軒家。<br className="hidden md:block"/>
-            聞こえるのは、風の音と鳥の声だけ。<br className="hidden md:block"/>
+            しまなみ海道・伯方島の山間にある一軒家。<br className="hidden md:block" />
+            聞こえるのは、風の音と鳥の声だけ。<br className="hidden md:block" />
             何もしない時間を過ごすための、大人の隠れ家です。
           </p>
           <a href="#contact" className="inline-flex items-center gap-2 bg-[#4A5D23] hover:bg-[#3A4A1C] text-white px-8 py-3 rounded-sm transition-colors duration-300 tracking-widest text-sm shadow-lg">
@@ -454,7 +417,7 @@ const App = () => {
             <div className="md:w-1/2 space-y-6">
               <span className="text-[#4A5D23] font-bold tracking-widest text-sm block mb-2">CONCEPT</span>
               <h2 className="text-3xl md:text-4xl font-serif text-stone-800 leading-snug">
-                大地に還る時間。<br/>心ほどける、島の日常。
+                大地に還る時間。<br />心ほどける、島の日常。
               </h2>
               <p className="text-stone-600 leading-relaxed">
                 Terra（テラ）はラテン語で「大地」を意味します。広い縁側でただ過ぎゆく時を感じ、窓辺のハンモックで微睡む。目の前に広がる里山の風景が、忙しい日常を忘れさせてくれます。
@@ -466,7 +429,7 @@ const App = () => {
             <div className="md:w-1/2">
               <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   <img src="/assets/photos/niwa.png" alt="Terraの庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                  <img src="/assets/photos/niwa.png" alt="Terraの庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 </div>
                 <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FDFCF8] p-4 hidden md:block">
                   <div className="w-full h-full border border-[#4A5D23] flex items-center justify-center text-[#4A5D23]">
@@ -501,31 +464,31 @@ const App = () => {
             ))}
           </div>
           <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
-             <div className="order-1 md:order-2 space-y-6">
-                <h3 className="text-2xl font-serif text-stone-800">心ほどける特等席と、<br/>暮らしを支える機能性</h3>
-                <div className="space-y-4">
-                  <div className="border-l-2 border-[#4A5D23] pl-4">
-                    <h4 className="font-bold text-stone-800">1F 縁側とダイニング</h4>
-                    <p className="text-sm text-stone-600 mt-1">PC作業も可能な広いダイニングテーブル。IHコンロ（2口）、冷蔵庫、電子レンジ、調理器具一式を完備しており、地元の食材での自炊に最適です。</p>
-                  </div>
-                  <div className="border-l-2 border-[#4A5D23] pl-4">
-                    <h4 className="font-bold text-stone-800">2F くつろぎの寝室群</h4>
-                    <p className="text-sm text-stone-600 mt-1">セミダブルベッド2台、布団6組をご用意。最大8名様まで滞在可能です。窓辺にハンモックのある部屋や、静かに読書ができる洋室など、思い思いの場所でお過ごしください。</p>
-                  </div>
-                  <div className="border-l-2 border-[#4A5D23] pl-4">
-                    <h4 className="font-bold text-stone-800">長期滞在の快適さ</h4>
-                    <p className="text-sm text-stone-600 mt-1">洗濯機、ドライヤー、清潔なバス・トイレを完備。Wi-Fiも各室で利用可能です。派手さはありませんが、実用性を重視した空間です。</p>
-                  </div>
+            <div className="order-1 md:order-2 space-y-6">
+              <h3 className="text-2xl font-serif text-stone-800">心ほどける特等席と、<br />暮らしを支える機能性</h3>
+              <div className="space-y-4">
+                <div className="border-l-2 border-[#4A5D23] pl-4">
+                  <h4 className="font-bold text-stone-800">1F 縁側とダイニング</h4>
+                  <p className="text-sm text-stone-600 mt-1">PC作業も可能な広いダイニングテーブル。IHコンロ（2口）、冷蔵庫、電子レンジ、調理器具一式を完備しており、地元の食材での自炊に最適です。</p>
                 </div>
-             </div>
-             <div className="order-2 md:order-1">
-               <div className="grid grid-cols-2 gap-4">
-                 <img src="/assets/photos/engawa.png" alt="縁側" className="w-full h-40 object-cover rounded-sm" />
-                 <img src="/assets/photos/view.png" alt="2Fからの眺め" className="w-full h-40 object-cover rounded-sm" />
-                 <img src="/assets/photos/dining.png" alt="ダイニング" className="w-full h-40 object-cover rounded-sm" />
-                 <img src="/assets/photos/exterior.png" alt="外観" className="w-full h-40 object-cover rounded-sm" />
-               </div>
-             </div>
+                <div className="border-l-2 border-[#4A5D23] pl-4">
+                  <h4 className="font-bold text-stone-800">2F くつろぎの寝室群</h4>
+                  <p className="text-sm text-stone-600 mt-1">セミダブルベッド2台、布団6組をご用意。最大8名様まで滞在可能です。窓辺にハンモックのある部屋や、静かに読書ができる洋室など、思い思いの場所でお過ごしください。</p>
+                </div>
+                <div className="border-l-2 border-[#4A5D23] pl-4">
+                  <h4 className="font-bold text-stone-800">長期滞在の快適さ</h4>
+                  <p className="text-sm text-stone-600 mt-1">洗濯機、ドライヤー、清潔なバス・トイレを完備。Wi-Fiも各室で利用可能です。派手さはありませんが、実用性を重視した空間です。</p>
+                </div>
+              </div>
+            </div>
+            <div className="order-2 md:order-1">
+              <div className="grid grid-cols-2 gap-4">
+                <img src="/assets/photos/engawa.png" alt="縁側" className="w-full h-40 object-cover rounded-sm" />
+                <img src="/assets/photos/view.png" alt="2Fからの眺め" className="w-full h-40 object-cover rounded-sm" />
+                <img src="/assets/photos/dining.png" alt="ダイニング" className="w-full h-40 object-cover rounded-sm" />
+                <img src="/assets/photos/exterior.png" alt="外観" className="w-full h-40 object-cover rounded-sm" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -540,32 +503,32 @@ const App = () => {
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-               <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                 <AlertTriangle size={24} />
-                 <h3 className="font-bold text-lg text-stone-800">自然環境・虫について</h3>
-               </div>
-               <p className="text-sm text-stone-600 leading-relaxed">自然豊かな場所のため、野良猫や虫（クモやムカデなど）が出ることがあります。殺虫剤などは完備していますが、自然環境の一部としてご理解いただけない方のご予約はご遠慮ください。</p>
+              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
+                <AlertTriangle size={24} />
+                <h3 className="font-bold text-lg text-stone-800">自然環境・虫について</h3>
+              </div>
+              <p className="text-sm text-stone-600 leading-relaxed">自然豊かな場所のため、野良猫や虫（クモやムカデなど）が出ることがあります。殺虫剤などは完備していますが、自然環境の一部としてご理解いただけない方のご予約はご遠慮ください。</p>
             </div>
             <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-               <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                 <Utensils size={24} />
-                 <h3 className="font-bold text-lg text-stone-800">お食事・買い物</h3>
-               </div>
-               <p className="text-sm text-stone-600 leading-relaxed">徒歩圏内に「山中商店」はありますが、近隣に飲食店や大型スーパーはありません。基本的に食材を持ち込んでの「自炊」がメインの滞在となります。</p>
-            </div>
-             <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-               <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                 <Dog size={24} />
-                 <h3 className="font-bold text-lg text-stone-800">ペットとの滞在</h3>
-               </div>
-               <p className="text-sm text-stone-600 leading-relaxed">小型犬のみ同伴可能です（追加料金なし）。中型・大型犬は受け入れ不可となります。必ずゲージをご持参の上、指定のスペースで管理をお願いいたします。</p>
+              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
+                <Utensils size={24} />
+                <h3 className="font-bold text-lg text-stone-800">お食事・買い物</h3>
+              </div>
+              <p className="text-sm text-stone-600 leading-relaxed">徒歩圏内に「山中商店」はありますが、近隣に飲食店や大型スーパーはありません。基本的に食材を持ち込んでの「自炊」がメインの滞在となります。</p>
             </div>
             <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-               <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                 <div className="flex gap-2"><CigaretteOff size={24} /><Trash2 size={24} /></div>
-                 <h3 className="font-bold text-lg text-stone-800">ハウスルール</h3>
-               </div>
-               <p className="text-sm text-stone-600 leading-relaxed">・室内は電子タバコ含め完全禁煙です（屋外に喫煙所あり）。<br/>・滞在中の清掃、ゴミの分別・処理はゲスト様ご自身でお願いします。<br/>・夜間（21時以降）はお静かにお願いします。</p>
+              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
+                <Dog size={24} />
+                <h3 className="font-bold text-lg text-stone-800">ペットとの滞在</h3>
+              </div>
+              <p className="text-sm text-stone-600 leading-relaxed">小型犬のみ同伴可能です（追加料金なし）。中型・大型犬は受け入れ不可となります。必ずゲージをご持参の上、指定のスペースで管理をお願いいたします。</p>
+            </div>
+            <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
+              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
+                <div className="flex gap-2"><CigaretteOff size={24} /><Trash2 size={24} /></div>
+                <h3 className="font-bold text-lg text-stone-800">ハウスルール</h3>
+              </div>
+              <p className="text-sm text-stone-600 leading-relaxed">・室内は電子タバコ含め完全禁煙です（屋外に喫煙所あり）。<br />・滞在中の清掃、ゴミの分別・処理はゲスト様ご自身でお願いします。<br />・夜間（21時以降）はお静かにお願いします。</p>
             </div>
           </div>
         </div>
@@ -576,9 +539,9 @@ const App = () => {
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="md:w-1/2">
-               <div className="relative">
+              <div className="relative">
                 <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                   <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ" className="w-full h-full object-cover" />
+                  <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#F9FAF6] p-4 hidden md:block">
                   <div className="w-full h-full border border-[#4A5D23] flex flex-col items-center justify-center text-[#4A5D23]">
@@ -590,7 +553,7 @@ const App = () => {
             </div>
             <div className="md:w-1/2 space-y-6">
               <span className="text-[#4A5D23] font-bold tracking-widest text-sm block mb-2">OPTIONAL MEALS</span>
-              <h2 className="text-3xl font-serif text-stone-800 leading-snug">島の日常を味わう、<br/>手作りの朝食とお弁当。</h2>
+              <h2 className="text-3xl font-serif text-stone-800 leading-snug">島の日常を味わう、<br />手作りの朝食とお弁当。</h2>
               <p className="text-stone-600 leading-relaxed">Terraの近隣にある「山中商店」にて、手作りのお弁当や朝食をご用意できます（要予約）。コンビニ弁当とは違う、家庭的な味とボリュームで、長期滞在中の健康と活力をサポートします。</p>
               <div className="bg-white p-6 rounded-sm border border-stone-200 mt-4">
                 <h4 className="font-bold text-stone-800 mb-3 flex items-center gap-2"><Coffee size={18} className="text-[#4A5D23]" /> ご利用について</h4>
@@ -623,8 +586,8 @@ const App = () => {
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(2)}>
-               <img src="/assets/photos/bento.png" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+              <img src="/assets/photos/bento.png" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(3)}>
               <img src="/assets/photos/view.png" alt="Gallery 4" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -635,16 +598,16 @@ const App = () => {
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
             <div className="col-span-2 md:col-span-2 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(5)}>
-               <img src="/assets/photos/engawa.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+              <img src="/assets/photos/engawa.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(6)}>
-               <img src="/assets/photos/hero2.jpg" alt="Gallery 7" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(6)}>
+              <img src="/assets/photos/hero2.jpg" alt="Gallery 7" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
-             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(7)}>
-               <img src="/assets/photos/exterior.png" alt="Gallery 8" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(7)}>
+              <img src="/assets/photos/exterior.png" alt="Gallery 8" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
           </div>
         </div>
@@ -658,7 +621,7 @@ const App = () => {
               <Sparkles size={14} /> POWERED BY GEMINI
             </div>
             <h2 className="text-3xl font-serif text-stone-800">Terra Life Assistant</h2>
-            <p className="text-stone-600 mt-4 max-w-2xl mx-auto">今日の夕食のレシピや、誰にも邪魔されない散歩道。<br/>あなたの静かな滞在を、AIアシスタントがそっとサポートします。</p>
+            <p className="text-stone-600 mt-4 max-w-2xl mx-auto">今日の夕食のレシピや、誰にも邪魔されない散歩道。<br />あなたの静かな滞在を、AIアシスタントがそっとサポートします。</p>
           </div>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-stone-100">
             <div className="p-6 md:p-8 bg-[#FDFCF8] border-b border-stone-100">
@@ -683,12 +646,12 @@ const App = () => {
               </form>
               {(aiResponse || aiError) && (
                 <div ref={aiResultRef} className="mt-6 animate-fade-in">
-                   <div className="flex gap-3">
-                     <div className="w-8 h-8 md:w-10 md:h-10 bg-[#4A5D23] rounded-full flex-shrink-0 flex items-center justify-center text-white"><Sparkles size={16} /></div>
-                     <div className="bg-[#F5F5F0] rounded-lg rounded-tl-none p-5 text-stone-800 w-full">
-                        {aiError ? <p className="text-red-600 text-sm">{aiError}</p> : <div className="prose prose-stone prose-sm max-w-none whitespace-pre-wrap leading-relaxed">{aiResponse}</div>}
-                     </div>
-                   </div>
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-[#4A5D23] rounded-full flex-shrink-0 flex items-center justify-center text-white"><Sparkles size={16} /></div>
+                    <div className="bg-[#F5F5F0] rounded-lg rounded-tl-none p-5 text-stone-800 w-full">
+                      {aiError ? <p className="text-red-600 text-sm">{aiError}</p> : <div className="prose prose-stone prose-sm max-w-none whitespace-pre-wrap leading-relaxed">{aiResponse}</div>}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -705,22 +668,22 @@ const App = () => {
               <MapPin size={40} className="text-[#4A5D23]" />
               <div><p className="text-lg font-bold text-stone-800">Terra -Shimanami-</p><p className="text-stone-600">〒794-2303 愛媛県今治市伯方町北浦甲1501-3</p></div>
             </div>
-            
+
             <div className="w-full h-64 md:h-96 bg-stone-100 rounded-sm mb-8 overflow-hidden border border-stone-200 shadow-inner">
-               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15001.718766085127!2d133.08585290656603!3d34.21415511207934!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35504f003ea8ae61%3A0x9483beb05b1df249!2sTerra%20-Shimanami-!5e1!3m2!1sja!2sjp!4v1764070070196!5m2!1sja!2sjp" 
-                width="100%" 
-                height="100%" 
-                style={{ border: 0 }} 
-                allowFullScreen="" 
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15001.718766085127!2d133.08585290656603!3d34.21415511207934!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35504f003ea8ae61%3A0x9483beb05b1df249!2sTerra%20-Shimanami-!5e1!3m2!1sja!2sjp!4v1764070070196!5m2!1sja!2sjp"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
                 title="Terra Location Map"
               ></iframe>
             </div>
 
             <div className="mb-8">
-              <a 
-                href="https://www.google.com/maps/search/?api=1&query=Terra+-Shimanami-" 
-                target="_blank" 
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Terra+-Shimanami-"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-[#4A5D23] border border-[#4A5D23] px-6 py-2 rounded-full text-sm hover:bg-[#4A5D23] hover:text-white transition-colors"
               >
@@ -728,15 +691,15 @@ const App = () => {
               </a>
               <p className="text-xs text-stone-400 mt-2">※地図が表示されない場合は上記ボタンをご利用ください</p>
             </div>
-            
+
             <div className="flex flex-col md:flex-row justify-center gap-8 text-left max-w-2xl mx-auto">
               <div className="flex-1">
                 <h4 className="font-bold text-stone-800 mb-2 border-b border-stone-300 pb-1">お車でお越しの方</h4>
-                <p className="text-sm text-stone-600 leading-relaxed">しまなみ海道「伯方島IC」から車で約10分。<br/>県道50号線を北浦方面へ。<br/>※駐車場1台分あり（要予約）</p>
+                <p className="text-sm text-stone-600 leading-relaxed">しまなみ海道「伯方島IC」から車で約10分。<br />県道50号線を北浦方面へ。<br />※駐車場1台分あり（要予約）</p>
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-stone-800 mb-2 border-b border-stone-300 pb-1">周辺情報</h4>
-                <p className="text-sm text-stone-600 leading-relaxed">・スーパー/商店：山中商店（徒歩圏内）<br/>・コンビニ：車で約5分<br/>・道の駅 マリンオアシスはかた：車で10分<br/><span className="text-xs text-stone-500 mt-1 block">※飲食店・大型スーパーは近くにありません</span></p>
+                <p className="text-sm text-stone-600 leading-relaxed">・スーパー/商店：山中商店（徒歩圏内）<br />・コンビニ：車で約5分<br />・道の駅 マリンオアシスはかた：車で10分<br /><span className="text-xs text-stone-500 mt-1 block">※飲食店・大型スーパーは近くにありません</span></p>
               </div>
             </div>
           </div>
@@ -744,13 +707,13 @@ const App = () => {
       </section>
 
       {/* 予約・お問い合わせセクション */}
-      
+
       <section id="contact" className="py-20 bg-[#2C3E28] text-white">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif mb-6">ご予約・空室確認</h2>
             <p className="opacity-90 leading-relaxed max-w-2xl mx-auto">
-              公式サイトからのご予約が最もお得（ベストレート）です。<br/>
+              公式サイトからのご予約が最もお得（ベストレート）です。<br />
               手数料がかからない分、各予約サイトよりお安くご案内しております。
             </p>
           </div>
@@ -761,7 +724,7 @@ const App = () => {
                 <Home size={24} />
                 <span className="font-bold tracking-widest text-lg">BASIC RATE (素泊まり・税込)</span>
               </div>
-              
+
               <div className="grid md:grid-cols-2 gap-8 text-left max-w-3xl mx-auto mb-8 divide-y md:divide-y-0 md:divide-x divide-white/20">
                 <div className="pt-4 md:pt-0 md:pr-8 text-center md:text-left">
                   <p className="text-sm text-[#A8B692] font-bold mb-2">平日（月〜木）</p>
@@ -776,16 +739,16 @@ const App = () => {
               </div>
 
               <div className="bg-white/5 p-6 rounded-sm text-left max-w-3xl mx-auto mb-6">
-                 <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-                   <div className="bg-[#A8B692] p-3 rounded-full text-white shrink-0">
-                      <Users size={24} />
-                   </div>
-                   <div className="flex-1 text-center md:text-left">
-                     <span className="font-bold block text-[#A8B692] text-base mb-1">5名様以上でのご利用</span>
-                     <p className="text-lg">5名様以降、お一人様あたり <span className="font-bold text-2xl text-white break-keep whitespace-nowrap">+5,000円</span> / 泊</p>
-                     <p className="text-sm opacity-60 mt-1">例）平日5名様利用の場合：合計 25,000円 / 泊</p>
-                   </div>
-                 </div>
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
+                  <div className="bg-[#A8B692] p-3 rounded-full text-white shrink-0">
+                    <Users size={24} />
+                  </div>
+                  <div className="flex-1 text-center md:text-left">
+                    <span className="font-bold block text-[#A8B692] text-base mb-1">5名様以上でのご利用</span>
+                    <p className="text-lg">5名様以降、お一人様あたり <span className="font-bold text-2xl text-white break-keep whitespace-nowrap">+5,000円</span> / 泊</p>
+                    <p className="text-sm opacity-60 mt-1">例）平日5名様利用の場合：合計 25,000円 / 泊</p>
+                  </div>
+                </div>
               </div>
 
               <div className="text-xs opacity-60 space-y-1 max-w-3xl mx-auto text-left">
@@ -796,187 +759,185 @@ const App = () => {
             </div>
           </div>
           {BOOKING_PAUSED ? (
-  <div className="bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl p-6 md:p-10">
-    <div className="text-center">
-      <h3 className="text-xl md:text-2xl font-bold text-[#4A5D23] mb-3">
-        公式サイトからの予約受付を一時停止しています
-      </h3>
-      <p className="text-stone-600 leading-relaxed">
-        システム調整のため、ただいま公式サイトの予約フォーム・空室カレンダーは停止中です。<br />
-        ご予約は下のボタンから Airbnb / じゃらん をご利用ください。
-      </p>
-    </div>
-  </div>
-) : (
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl">
-            {/* カレンダーエリア */}
-            <div className="p-6 md:p-8 bg-stone-50">
-              <h3 className="font-bold text-lg mb-4 text-[#4A5D23] flex items-center gap-2"><CalendarCheck size={20} /> 空室状況</h3>
-              <p className="text-xs text-stone-500 mb-4">
-                空室状況の目安としてご覧ください（最新の空き状況はフォーム送信時に自動判定されます）。
-              </p>
-              <div className="aspect-[4/3] w-full bg-white border border-stone-200 rounded-sm overflow-hidden relative">
-                 <iframe 
-                    src="https://calendar.google.com/calendar/embed?src=（あなたの新しいカレンダーID）@group.calendar.google.com&ctz=Asia%2FTokyo" 
-                    style={{ border: 0 }} 
-                    width="100%" 
-                    height="100%" 
-                    frameBorder="0" 
-                    scrolling="no" 
+            <div className="bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl p-6 md:p-10">
+              <div className="text-center">
+                <h3 className="text-xl md:text-2xl font-bold text-[#4A5D23] mb-3">
+                  公式サイトからの予約受付を一時停止しています
+                </h3>
+                <p className="text-stone-600 leading-relaxed">
+                  システム調整のため、ただいま公式サイトの予約フォーム・空室カレンダーは停止中です。<br />
+                  ご予約は下のボタンから Airbnb / じゃらん をご利用ください。
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl">
+              {/* カレンダーエリア */}
+              <div className="p-6 md:p-8 bg-stone-50">
+                <h3 className="font-bold text-lg mb-4 text-[#4A5D23] flex items-center gap-2"><CalendarCheck size={20} /> 空室状況</h3>
+                <p className="text-xs text-stone-500 mb-4">
+                  空室状況の目安としてご覧ください（最新の空き状況はフォーム送信時に自動判定されます）。
+                </p>
+                <div className="aspect-[4/3] w-full bg-white border border-stone-200 rounded-sm overflow-hidden relative">
+                  <iframe
+                    src="https://calendar.google.com/calendar/embed?src=（あなたの新しいカレンダーID）@group.calendar.google.com&ctz=Asia%2FTokyo"
+                    style={{ border: 0 }}
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    scrolling="no"
                     title="Terra Availability Calendar">
-                 </iframe>
-              </div>
-              <div className="mt-4 text-xs text-stone-500 bg-white p-3 rounded border border-stone-100">
-                <strong>ご予約の流れ：</strong>
-                <ol className="list-decimal list-inside mt-1 space-y-1">
-                  <li>右側のフォームから日付と人数を入力</li>
-                  <li>自動計算された金額を確認して「支払いへ進む」</li>
-                  <li>入力アドレスに届く<strong>請求書メールから決済</strong>して予約確定</li>
-                </ol>
-              </div>
-            </div>
-
-            {/* 予約フォームエリア */}
-            <div className="p-6 md:p-8">
-              <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約リクエスト</h3>
-              
-              {formStatus === 'success_invoice' ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
-                  <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4"><CheckCircle size={32} /></div>
-                  <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">予約リクエスト送信完了</h4>
-                  <p className="text-stone-600 mb-4">
-                    ご入力いただいたメールアドレスに<br/>
-                    <strong>【Terra】ご宿泊代金のお支払い</strong><br/>
-                    という件名のメールを送信しました。
-                  </p>
-                  <p className="text-sm text-stone-500 bg-stone-100 p-3 rounded text-left">
-                    メール内のリンクからカード決済を完了してください。<br/>
-                    <strong>決済完了をもって予約確定となります。</strong><br/>
-                    ※1時間以内に決済されない場合、仮予約は自動キャンセルとなります。<br/>
-                    ※決済完了後、オーナーよりハウスルール等をお送りします。
-                  </p>
-                  <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
+                  </iframe>
                 </div>
-              ) : formStatus === 'success_inquiry' ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
-                  <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4"><Mail size={32} /></div>
-                  <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">お問い合わせ送信完了</h4>
-                  <p className="text-stone-600">
-                    お問い合わせありがとうございます。<br/>
-                    長期滞在割引について、24時間以内にメールにて<br/>ご連絡させていただきます。
-                  </p>
-                  <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
+                <div className="mt-4 text-xs text-stone-500 bg-white p-3 rounded border border-stone-100">
+                  <strong>ご予約の流れ（現在リクエスト予約となります）：</strong>
+                  <ol className="list-decimal list-inside mt-1 space-y-1">
+                    <li>右側のフォームから日付と人数を入力しリクエストを送信</li>
+                    <li>オーナーが空室状況を確認し、24時間以内にご返信します</li>
+                    <li>メールで届く<strong>決済リンクからお支払い</strong>いただき予約確定</li>
+                  </ol>
                 </div>
-              ) : (
-                <form 
-                  name="booking" 
-                  method="POST" 
-                  data-netlify="true"
-                  onSubmit={priceInfo.isLongStay ? handleInquirySubmit : handleCheckout} 
-                  className="space-y-4"
-                >
-                  <input type="hidden" name="form-name" value="booking" />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-stone-500 mb-1">チェックイン</label>
-                      <input 
-                        type="date" 
-                        name="checkin" 
-                        required 
-                        min={today} // 今日以降のみ
-                        onChange={handleChange} 
-                        className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-stone-500 mb-1">チェックアウト</label>
-                      <input 
-                        type="date" 
-                        name="checkout" 
-                        required 
-                        min={bookingData.checkin || today} // チェックイン日以降のみ
-                        onChange={handleChange} 
-                        className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" 
-                      />
-                    </div>
+              </div>
+
+              {/* 予約フォームエリア */}
+              <div className="p-6 md:p-8">
+                <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約リクエスト</h3>
+
+                {formStatus === 'success_invoice' ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
+                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4"><CheckCircle size={32} /></div>
+                    <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">リクエスト送信完了（仮予約）</h4>
+                    <p className="text-stone-600 mb-4">
+                      ご予約のリクエストを受け付けました。<br />
+                      この時点では<strong>まだ予約は確定しておりません。</strong>
+                    </p>
+                    <p className="text-sm text-stone-500 bg-stone-100 p-3 rounded text-left">
+                      空室状況を確認の上、24時間以内にご登録いただいたメールアドレスへ<br />
+                      ご予約確定のご案内と決済リンクをお送りいたします。<br />
+                      メール内のリンクよりお支払いをお願いいたします。
+                    </p>
+                    <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
                   </div>
-
-                  <div>
-                     <label className="block text-xs font-bold text-stone-500 mb-1">宿泊人数 (最大8名)</label>
-                     <select name="guests" onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm">
-                       {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}名</option>)}
-                     </select>
+                ) : formStatus === 'success_inquiry' ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
+                    <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4"><Mail size={32} /></div>
+                    <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">お問い合わせ送信完了</h4>
+                    <p className="text-stone-600">
+                      お問い合わせありがとうございます。<br />
+                      長期滞在割引について、24時間以内にメールにて<br />ご連絡させていただきます。
+                    </p>
+                    <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
                   </div>
-
-                  <div className="bg-[#F9FAF6] p-4 rounded border border-stone-200 mt-4">
-                    {priceInfo.nights > 0 ? (
-                      <div>
-                        <div className="flex justify-between items-end mb-2">
-                          <span className="text-sm font-bold text-stone-600">{priceInfo.nights}泊 × {bookingData.guests}名</span>
-                          {priceInfo.isLongStay ? (
-                             <span className="text-[#4A5D23] font-bold">長期割引対象</span>
-                          ) : (
-                             <span className="text-2xl font-bold text-[#4A5D23]">¥{priceInfo.total.toLocaleString()}</span>
-                          )}
-                        </div>
-                        {priceInfo.isLongStay && <p className="text-xs text-stone-500">※5泊以上の長期滞在は、特別割引にてご案内いたします。下記ボタンよりお問い合わせください。</p>}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-stone-400 text-center">日程を選択すると見積もりが表示されます</p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-stone-500 mb-1">お名前</label>
-                      <input type="text" name="name" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="山田 太郎" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-stone-500 mb-1">メールアドレス</label>
-                      <input type="email" name="email" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="example@email.com" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-stone-500 mb-1">メッセージ（任意）</label>
-                    <textarea name="message" rows="2" onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="チェックイン予定時刻など"></textarea>
-                  </div>
-
-                  {checkoutError && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded text-xs border border-red-200">
-                      <AlertTriangle size={14} className="inline mr-1"/> {checkoutError}
-                    </div>
-                  )}
-
-                  <button 
-                    type="submit" 
-                    disabled={checkoutLoading}
-                    className={`w-full text-white py-3 rounded-sm transition-colors font-bold tracking-wider flex items-center justify-center gap-2 ${priceInfo.isLongStay ? 'bg-[#A8B692] hover:bg-[#8F9E7A]' : 'bg-[#4A5D23] hover:bg-[#3A4A1C]'}`}
+                ) : (
+                  <form
+                    name="booking"
+                    method="POST"
+                    data-netlify="true"
+                    onSubmit={priceInfo.isLongStay ? handleInquirySubmit : handleCheckout}
+                    className="space-y-4"
                   >
-                    {checkoutLoading ? (
-                      <Loader className="animate-spin" size={20} /> 
-                    ) : priceInfo.isLongStay ? (
-                      <>お問い合わせ（長期割引） <Mail size={18}/></>
-                    ) : (
-                      <>支払いへ進む（請求書を送る） <Send size={18}/></>
+                    <input type="hidden" name="form-name" value="booking" />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-stone-500 mb-1">チェックイン</label>
+                        <input
+                          type="date"
+                          name="checkin"
+                          required
+                          min={today} // 今日以降のみ
+                          onChange={handleChange}
+                          className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-stone-500 mb-1">チェックアウト</label>
+                        <input
+                          type="date"
+                          name="checkout"
+                          required
+                          min={bookingData.checkin || today} // チェックイン日以降のみ
+                          onChange={handleChange}
+                          className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-stone-500 mb-1">宿泊人数 (最大8名)</label>
+                      <select name="guests" onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n}名</option>)}
+                      </select>
+                    </div>
+
+                    <div className="bg-[#F9FAF6] p-4 rounded border border-stone-200 mt-4">
+                      {priceInfo.nights > 0 ? (
+                        <div>
+                          <div className="flex justify-between items-end mb-2">
+                            <span className="text-sm font-bold text-stone-600">{priceInfo.nights}泊 × {bookingData.guests}名</span>
+                            {priceInfo.isLongStay ? (
+                              <span className="text-[#4A5D23] font-bold">長期割引対象</span>
+                            ) : (
+                              <span className="text-2xl font-bold text-[#4A5D23]">¥{priceInfo.total.toLocaleString()}</span>
+                            )}
+                          </div>
+                          {priceInfo.isLongStay && <p className="text-xs text-stone-500">※5泊以上の長期滞在は、特別割引にてご案内いたします。下記ボタンよりお問い合わせください。</p>}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-stone-400 text-center">日程を選択すると見積もりが表示されます</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-stone-500 mb-1">お名前</label>
+                        <input type="text" name="name" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="山田 太郎" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-stone-500 mb-1">メールアドレス</label>
+                        <input type="email" name="email" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="example@email.com" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-stone-500 mb-1">メッセージ（任意）</label>
+                      <textarea name="message" rows="2" onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="チェックイン予定時刻など"></textarea>
+                    </div>
+
+                    {checkoutError && (
+                      <div className="bg-red-50 text-red-600 p-3 rounded text-xs border border-red-200">
+                        <AlertTriangle size={14} className="inline mr-1" /> {checkoutError}
+                      </div>
                     )}
-                  </button>
-                  
-                  <p className="text-[10px] text-center text-stone-400">
-                    {priceInfo.isLongStay ? "※長期滞在のご相談として送信されます" : "※メールでSquareの決済リンクをお送りします"}
-                  </p>
-                </form>
-              )}
+
+                    <button
+                      type="submit"
+                      disabled={checkoutLoading}
+                      className={`w-full text-white py-3 rounded-sm transition-colors font-bold tracking-wider flex items-center justify-center gap-2 ${priceInfo.isLongStay ? 'bg-[#A8B692] hover:bg-[#8F9E7A]' : 'bg-[#4A5D23] hover:bg-[#3A4A1C]'}`}
+                    >
+                      {checkoutLoading ? (
+                        <Loader className="animate-spin" size={20} />
+                      ) : priceInfo.isLongStay ? (
+                        <>お問い合わせ（長期割引） <Mail size={18} /></>
+                      ) : (
+                        <>リクエストを送信する（仮予約） <Send size={18} /></>
+                      )}
+                    </button>
+
+                    <p className="text-[10px] text-center text-stone-400">
+                      {priceInfo.isLongStay ? "※長期滞在のご相談として送信されます" : "※空室確認後、お支払いのご案内をお送りします"}
+                    </p>
+                  </form>
+                )}
+              </div>
             </div>
-          </div>
           )}
           <div className="mt-12 text-center">
-             <p className="text-sm opacity-80 mb-4">即時予約はこちら（OTAサイト）</p>
-             <div className="flex justify-center gap-4 flex-wrap">
-               <a href="https://www.airbnb.jp/rooms/1559396243936791784?source_impression_id=p3_1764072846_P34Mc5WDV_W3hHb-" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF5A5F] border border-[#FF5A5F] px-6 py-2 rounded-full text-sm hover:bg-[#FF5A5F] hover:text-white transition-colors"><ExternalLink size={16} /> Airbnb</a>
-               <a href="https://www.jalan.net/yad315633/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF7500] border border-[#FF7500] px-6 py-2 rounded-full text-sm hover:bg-[#FF7500] hover:text-white transition-colors"><ExternalLink size={16} /> じゃらん</a>
-             </div>
+            <p className="text-sm opacity-80 mb-4">即時予約はこちら（OTAサイト）</p>
+            <div className="flex justify-center gap-4 flex-wrap">
+              <a href="https://www.airbnb.jp/rooms/1559396243936791784?source_impression_id=p3_1764072846_P34Mc5WDV_W3hHb-" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF5A5F] border border-[#FF5A5F] px-6 py-2 rounded-full text-sm hover:bg-[#FF5A5F] hover:text-white transition-colors"><ExternalLink size={16} /> Airbnb</a>
+              <a href="https://www.jalan.net/yad315633/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF7500] border border-[#FF7500] px-6 py-2 rounded-full text-sm hover:bg-[#FF7500] hover:text-white transition-colors"><ExternalLink size={16} /> じゃらん</a>
+            </div>
           </div>
         </div>
       </section>
