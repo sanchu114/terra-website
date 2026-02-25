@@ -1,3 +1,7 @@
+if (process.env.BOOKING_PAUSED === "true") {
+  return { statusCode: 503, body: "Booking paused" };
+}
+
 const { google } = require('googleapis');
 const { Client, Environment } = require('square');
 const { v4: uuidv4 } = require('uuid');
