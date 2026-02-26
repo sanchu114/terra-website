@@ -19,7 +19,7 @@ const squareClient = new Client({
   environment: Environment.Production,
 });
 
-// 料金計算ロジック
+// 料金計算ロジック（適正価格・ベストレート体系）
 const calculatePrice = (checkin, checkout, guests) => {
   const start = new Date(checkin);
   const end = new Date(checkout);
@@ -32,15 +32,17 @@ const calculatePrice = (checkin, checkout, guests) => {
     let d = new Date(start);
     d.setDate(start.getDate() + i);
     const day = d.getDay();
-    // 金(5), 土(6), 日(0) は休前日料金 30,000円、それ以外は 20,000円
+    // 金(5), 土(6), 日(0) は休日料金 22,000円、それ以外は 15,000円
+    // ※1〜2名様までのベース料金
     if (day === 5 || day === 6 || day === 0) {
-      totalBasePrice += 30000;
+      totalBasePrice += 22000;
     } else {
-      totalBasePrice += 20000;
+      totalBasePrice += 15000;
     }
   }
 
-  const extraGuestPrice = guests > 4 ? (guests - 4) * 5000 * nights : 0;
+  // 3名様目以降、お一人様あたり +5,000円
+  const extraGuestPrice = guests > 2 ? (guests - 2) * 5000 * nights : 0;
   return { totalPrice: totalBasePrice + extraGuestPrice, nights };
 };
 
