@@ -163,17 +163,18 @@ exports.handler = async (event) => {
     // ※ ここにあった publishInvoice（自動送信処理）を削除し、無断でお客様へメールが飛ばないように修正。
     const invoiceId = invoiceRes.result.invoice.id;
 
-    // 7. Googleカレンダーへ仮押さえ（HOLD）の作成
-    const eventDescription = `【仮予約リクエスト】オーナー承認待ち\n\nゲスト: ${name} (${email})\n人数: ${guests}名\n合計予定額: ¥${totalPrice.toLocaleString()}\nSquare下書き請求書ID: ${invoiceId}\n\n※OTAと重複がなければSquareで請求書を送信してください。\nお断りする場合はこのカレンダー予定を削除してください。`;
+    // 7. Googleカレンダーへ予定の作成
+    // 確定時にもそのまま残せるように「HOLD」や「仮予約」の表記をやめ、自社サイト経由とわかるように[Direct]をつける
+    const eventDescription = `公式サイトからの予約リクエスト（未決済）\n\nゲスト: ${name} (${email})\n人数: ${guests}名\n合計予定額: ¥${totalPrice.toLocaleString()}\nSquare下書き請求書ID: ${invoiceId}\n\n※OTAと重複がなければSquareで請求書を送信してください。\nお断りする場合はこのカレンダー予定を削除してください。`;
 
     await calendar.events.insert({
       calendarId: CAL_DIRECT_ID,
       requestBody: {
-        summary: `HOLD - ${name}様 (仮予約)`,
+        summary: `[Direct] ${name}様`,
         description: eventDescription,
         start: { date: checkin },
         end: { date: checkout },
-        colorId: '8', // グレー
+        colorId: '8', // グレーのまま（色で未確定判別なども可能。不要ならデフォルト色になります）
       },
     });
 

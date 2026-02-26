@@ -133,7 +133,6 @@ const App = () => {
     { name: 'お部屋・設備', href: '#rooms' },
     { name: '注意事項', href: '#notes' },
     { name: 'お食事', href: '#meals' },
-    { name: 'AIアシスタント', href: '#ai-assistant' },
     { name: 'アクセス', href: '#access' },
     { name: 'ご予約', href: '#contact' },
   ];
@@ -679,7 +678,7 @@ const App = () => {
                 </p>
                 <div className="aspect-[4/3] w-full bg-white border border-stone-200 rounded-sm overflow-hidden relative">
                   <iframe
-                    src="https://calendar.google.com/calendar/embed?src=（あなたの新しいカレンダーID）@group.calendar.google.com&ctz=Asia%2FTokyo"
+                    src="https://calendar.google.com/calendar/embed?src=34be616fad496d75975b501fedd8982239235375b20c52a8502db3f22ef6e5cb%40group.calendar.google.com&ctz=Asia%2FTokyo"
                     style={{ border: 0 }}
                     width="100%"
                     height="100%"
