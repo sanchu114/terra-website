@@ -87,13 +87,13 @@ const App = () => {
           let d = new Date(start);
           d.setDate(start.getDate() + i);
           const day = d.getDay();
-          // 金(5), 土(6), 日(0) は休前日扱い: 30000円、その他: 20000円
-          const dailyRate = (day === 5 || day === 6 || day === 0) ? 30000 : 20000;
+          // 金(5), 土(6), 日(0) は休日料金 22,000円、その他: 15,000円 (1〜2名ベース)
+          const dailyRate = (day === 5 || day === 6 || day === 0) ? 22000 : 15000;
           total += dailyRate;
         }
-        // 追加人数
-        if (bookingData.guests > 4) {
-          total += (bookingData.guests - 4) * 5000 * nights;
+        // 3名様目以降、お一人様あたり +5,000円
+        if (bookingData.guests > 2) {
+          total += (bookingData.guests - 2) * 5000 * nights;
         }
         setPriceInfo({ total, nights, isLongStay: nights >= 5 });
       } else {
