@@ -7,13 +7,6 @@ const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // AI関連のState
-  const [aiInput, setAiInput] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiError, setAiError] = useState('');
-  const aiResultRef = useRef(null);
-
   // 予約計算・決済関連 State
   const [bookingData, setBookingData] = useState({
     name: '', email: '', checkin: '', checkout: '', guests: 1, message: ''
@@ -147,71 +140,7 @@ const App = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Gemini API 呼び出しロジック
-  const callGeminiAPI = async (promptText) => {
-    setIsAiLoading(true);
-    setAiResponse('');
-    setAiError('');
-
-    try {
-      const fetchWithRetry = async (retries = 3, delay = 1000) => {
-        try {
-          const response = await fetch('/.netlify/functions/chatWithAI', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ promptText })
-          });
-
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`AI API Error Status: ${response.status}`);
-            console.error(`AI API Response Body (First 100 chars): ${errorText.substring(0, 100)}`);
-            throw new Error(`API Error: ${response.status}`);
-          }
-
-          const data = await response.json();
-          return data;
-        } catch (error) {
-          if (retries === 0) throw error;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          return fetchWithRetry(retries - 1, delay * 2);
-        }
-      };
-
-      const data = await fetchWithRetry();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (text) {
-        setAiResponse(text);
-      } else {
-        setAiError('申し訳ありません。うまく回答を生成できませんでした。');
-      }
-
-    } catch (error) {
-      console.error(error);
-      setAiError(error.message || '通信エラーが発生しました。');
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
-  const handleAiSubmit = (e) => {
-    e.preventDefault();
-    if (!aiInput.trim()) return;
-    callGeminiAPI(aiInput);
-  };
-
-  const handlePresetQuestion = (type) => {
-    if (type === 'recipe') {
-      const q = "疲れていて自炊する元気がありません。山中商店のお弁当サービスについて詳しく教えてください。";
-      setAiInput(q);
-      callGeminiAPI(q);
-    } else if (type === 'weekend') {
-      const q = "読みかけの本を持って出かけたいです。伯方島内で、波の音だけが聞こえるような、静かで人が少ない場所はありますか？";
-      setAiInput(q);
-      callGeminiAPI(q);
-    }
-  };
+  // AI関連関数は削除されました
 
   // ★修正：請求書発行処理
   const handleCheckout = async (e) => {
@@ -624,52 +553,6 @@ const App = () => {
             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(7)}>
               <img src="/assets/photos/exterior.png" alt="Gallery 8" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AIアシスタントセクション */}
-      <section id="ai-assistant" className="py-20 bg-gradient-to-br from-[#E8ECD6] to-[#F5F5F0]">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-[#4A5D23] text-white px-4 py-1 rounded-full text-xs font-bold tracking-widest mb-4">
-              <Sparkles size={14} /> POWERED BY GEMINI
-            </div>
-            <h2 className="text-3xl font-serif text-stone-800">Terra Life Assistant</h2>
-            <p className="text-stone-600 mt-4 max-w-2xl mx-auto">今日の夕食のレシピや、誰にも邪魔されない散歩道。<br />あなたの静かな滞在を、AIアシスタントがそっとサポートします。</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-stone-100">
-            <div className="p-6 md:p-8 bg-[#FDFCF8] border-b border-stone-100">
-              <p className="text-sm text-stone-500 font-bold mb-4">たとえば、こんなことを聞いてみてください</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button onClick={() => handlePresetQuestion('recipe')} className="flex items-center gap-3 p-4 rounded-lg border border-stone-200 hover:border-[#4A5D23] hover:bg-[#F5F9F2] transition-colors text-left group">
-                  <div className="bg-orange-100 text-orange-600 p-2 rounded-full group-hover:scale-110 transition-transform"><Utensils size={20} /></div>
-                  <div><span className="font-bold text-stone-800 block text-sm">母の味を注文</span><span className="text-xs text-stone-500">山中商店のお弁当について</span></div>
-                </button>
-                <button onClick={() => handlePresetQuestion('weekend')} className="flex items-center gap-3 p-4 rounded-lg border border-stone-200 hover:border-[#4A5D23] hover:bg-[#F5F9F2] transition-colors text-left group">
-                  <div className="bg-blue-100 text-blue-600 p-2 rounded-full group-hover:scale-110 transition-transform"><Sun size={20} /></div>
-                  <div><span className="font-bold text-stone-800 block text-sm">静寂を探しに</span><span className="text-xs text-stone-500">波音だけの読書スポット</span></div>
-                </button>
-              </div>
-            </div>
-            <div className="p-6 md:p-8">
-              <form onSubmit={handleAiSubmit} className="relative">
-                <textarea value={aiInput} onChange={(e) => setAiInput(e.target.value)} placeholder="例：考え事をしたいので、海が見える静かな場所を教えてください。" className="w-full p-4 pr-12 rounded-lg border border-stone-300 focus:ring-2 focus:ring-[#4A5D23] focus:border-transparent outline-none resize-none min-h-[100px] text-stone-800 placeholder-stone-400" />
-                <button type="submit" disabled={isAiLoading || !aiInput.trim()} className="absolute bottom-4 right-4 bg-[#4A5D23] text-white p-2 rounded-full hover:bg-[#3A4A1C] disabled:opacity-50 disabled:cursor-not-allowed transition-colors" aria-label="送信">
-                  {isAiLoading ? <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" /> : <ArrowRight size={20} />}
-                </button>
-              </form>
-              {(aiResponse || aiError) && (
-                <div ref={aiResultRef} className="mt-6 animate-fade-in">
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 md:w-10 md:h-10 bg-[#4A5D23] rounded-full flex-shrink-0 flex items-center justify-center text-white"><Sparkles size={16} /></div>
-                    <div className="bg-[#F5F5F0] rounded-lg rounded-tl-none p-5 text-stone-800 w-full">
-                      {aiError ? <p className="text-red-600 text-sm">{aiError}</p> : <div className="prose prose-stone prose-sm max-w-none whitespace-pre-wrap leading-relaxed">{aiResponse}</div>}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
