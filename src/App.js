@@ -626,13 +626,13 @@ const App = () => {
               <div className="grid md:grid-cols-2 gap-8 text-left max-w-3xl mx-auto mb-8 divide-y md:divide-y-0 md:divide-x divide-white/20">
                 <div className="pt-4 md:pt-0 md:pr-8 text-center md:text-left">
                   <p className="text-sm text-[#A8B692] font-bold mb-2">平日（月〜木）</p>
-                  <p className="text-4xl font-sans font-medium break-keep whitespace-nowrap mb-1">20,000円 <span className="text-sm font-normal opacity-70">/ 泊</span></p>
-                  <p className="text-xs opacity-60">※1〜4名様まで同一料金</p>
+                  <p className="text-4xl font-sans font-medium break-keep whitespace-nowrap mb-1">15,000円 <span className="text-sm font-normal opacity-70">/ 泊</span></p>
+                  <p className="text-xs opacity-60">※1〜2名様まで同一料金</p>
                 </div>
                 <div className="pt-4 md:pt-0 md:pl-8 text-center md:text-left">
                   <p className="text-sm text-[#A8B692] font-bold mb-2">金・土・日・祝前日</p>
-                  <p className="text-4xl font-sans font-medium break-keep whitespace-nowrap mb-1">30,000円 <span className="text-sm font-normal opacity-70">/ 泊</span></p>
-                  <p className="text-xs opacity-60">※1〜4名様まで同一料金</p>
+                  <p className="text-4xl font-sans font-medium break-keep whitespace-nowrap mb-1">22,000円 <span className="text-sm font-normal opacity-70">/ 泊</span></p>
+                  <p className="text-xs opacity-60">※1〜2名様まで同一料金</p>
                 </div>
               </div>
 
@@ -642,9 +642,9 @@ const App = () => {
                     <Users size={24} />
                   </div>
                   <div className="flex-1 text-center md:text-left">
-                    <span className="font-bold block text-[#A8B692] text-base mb-1">5名様以上でのご利用</span>
-                    <p className="text-lg">5名様以降、お一人様あたり <span className="font-bold text-2xl text-white break-keep whitespace-nowrap">+5,000円</span> / 泊</p>
-                    <p className="text-sm opacity-60 mt-1">例）平日5名様利用の場合：合計 25,000円 / 泊</p>
+                    <span className="font-bold block text-[#A8B692] text-base mb-1">3名様以上でのご利用</span>
+                    <p className="text-lg">3名様以降、お一人様あたり <span className="font-bold text-2xl text-white break-keep whitespace-nowrap">+5,000円</span> / 泊</p>
+                    <p className="text-sm opacity-60 mt-1">例）平日3名様利用の場合：合計 20,000円 / 泊</p>
                   </div>
                 </div>
               </div>
