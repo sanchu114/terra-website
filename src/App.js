@@ -161,8 +161,15 @@ const App = () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ promptText })
           });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`AI API Error Status: ${response.status}`);
+            console.error(`AI API Response Body (First 100 chars): ${errorText.substring(0, 100)}`);
+            throw new Error(`API Error: ${response.status}`);
+          }
+
           const data = await response.json();
-          if (!response.ok) throw new Error(data.error || `API Error: ${response.status}`);
           return data;
         } catch (error) {
           if (retries === 0) throw error;
@@ -234,11 +241,20 @@ const App = () => {
         body: JSON.stringify(bookingData),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.message || '予約処理に失敗しました');
+        const errorText = await response.text();
+        console.error(`Checkout API Error Status: ${response.status}`);
+        console.error(`Checkout API Response Body (First 100 chars): ${errorText.substring(0, 100)}`);
+        // JSONでない場合はtext()を投げるなどの処理
+        try {
+          const result = await JSON.parse(errorText);
+          throw new Error(result.message || '予約処理に失敗しました');
+        } catch (e) {
+          throw new Error(`サーバーから不正なレスポンスが返りました(Status: ${response.status})。Netlify以外の環境（npm start等）ではFunctionsは動作しません。`);
+        }
       }
+
+      const result = await response.json();
 
       // ★成功したら画面を切り替える（リダイレクトしない）
       setFormStatus('success_invoice');
