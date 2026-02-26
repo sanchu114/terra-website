@@ -1,6 +1,4 @@
-if (process.env.BOOKING_PAUSED === "true") {
-  return { statusCode: 503, body: "Booking paused" };
-}
+// 予約停止フラグのチェックはハンドラー内で行います。
 
 const { google } = require('googleapis');
 const { Client, Environment } = require('square');
@@ -13,13 +11,13 @@ const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID;
 const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
 // Netlify環境変数での改行コード対策
 const GOOGLE_PRIVATE_KEY = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
-const CAL_DIRECT_ID = process.env.CAL_DIRECT_ID; 
+const CAL_DIRECT_ID = process.env.CAL_DIRECT_ID;
 const CAL_BLOCK_ID = process.env.CAL_BLOCK_ID;
 
 // Squareクライアント初期化
 const squareClient = new Client({
   accessToken: SQUARE_ACCESS_TOKEN,
-  environment: Environment.Production, 
+  environment: Environment.Production,
 });
 
 // 料金計算ロジック
@@ -29,7 +27,7 @@ const calculatePrice = (checkin, checkout, guests) => {
   const nights = differenceInCalendarDays(end, start);
 
   if (nights < 1) throw new Error("宿泊日数が不正です");
-  
+
   let totalBasePrice = 0;
   for (let i = 0; i < nights; i++) {
     let d = new Date(start);
@@ -54,7 +52,7 @@ const cleanUpExpiredHolds = async (calendar) => {
     // 過去24時間以内のイベントを取得してチェック
     const eventsRes = await calendar.events.list({
       calendarId: CAL_DIRECT_ID,
-      timeMin: subMinutes(now, 1440).toISOString(), 
+      timeMin: subMinutes(now, 1440).toISOString(),
       singleEvents: true,
       q: "HOLD", // タイトルにHOLDが含まれるものを検索
     });
@@ -81,6 +79,10 @@ const cleanUpExpiredHolds = async (calendar) => {
 };
 
 exports.handler = async (event) => {
+  if (process.env.BOOKING_PAUSED === "true") {
+    return { statusCode: 503, body: JSON.stringify({ message: "現在、公式サイトからの予約受付を一時停止しております。OTAサイトをご利用ください。" }) };
+  }
+
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
@@ -123,14 +125,14 @@ exports.handler = async (event) => {
         items: [{ id: CAL_DIRECT_ID }, { id: CAL_BLOCK_ID }]
       }
     });
-    
+
     const calendars = freeBusyResponse.data.calendars;
     const busyDirect = calendars[CAL_DIRECT_ID]?.busy || [];
     const busyBlock = calendars[CAL_BLOCK_ID]?.busy || [];
 
     if (busyDirect.length > 0 || busyBlock.length > 0) {
       return {
-        statusCode: 409, 
+        statusCode: 409,
         body: JSON.stringify({ message: "申し訳ありません。選択された日程は既に埋まっています。" }),
       };
     }
@@ -163,7 +165,7 @@ exports.handler = async (event) => {
 
     // 7. Square請求書作成
     const dueDate = addMinutes(new Date(), 60); // 1時間後
-    const dueDateString = dueDate.toISOString().split('T')[0]; 
+    const dueDateString = dueDate.toISOString().split('T')[0];
 
     const invoiceRes = await squareClient.invoicesApi.createInvoice({
       invoice: {
@@ -174,14 +176,14 @@ exports.handler = async (event) => {
         },
         paymentRequests: [{
           requestType: 'BALANCE',
-          dueDate: dueDateString, 
+          dueDate: dueDateString,
           automaticPaymentSource: 'NONE',
           reminders: [{
-            relativeScheduledDays: -1, 
+            relativeScheduledDays: -1,
             message: "ご予約ありがとうございます。本メールより決済をお願いいたします。"
           }]
         }],
-        deliveryMethod: 'EMAIL', 
+        deliveryMethod: 'EMAIL',
         title: '【Terra】ご宿泊代金のお支払い',
         description: `ご予約ありがとうございます。\n宿泊日: ${checkin} 〜 ${checkout} (${nights}泊)\n人数: ${guests}名\n\n本メールの「カードで支払う」ボタンより決済をお願いいたします。\n\n※決済完了をもって予約確定となります。\n※確定後、当日の入室方法やハウスルールを別途メールにてお送りいたします。`,
         acceptedPaymentMethods: {
@@ -192,12 +194,12 @@ exports.handler = async (event) => {
       },
       idempotencyKey: uuidv4()
     });
-    
+
     // ★修正ポイント：作成された請求書のIDだけでなく、バージョン番号も取得する
     const invoice = invoiceRes.result.invoice;
     const invoiceId = invoice.id;
     const invoiceVersion = invoice.version;
-    
+
     // 請求書を「公開（送信）」する
     // ★修正ポイント：バージョン番号を含めて送信リクエストを送る
     await squareClient.invoicesApi.publishInvoice(invoiceId, {
@@ -207,7 +209,7 @@ exports.handler = async (event) => {
 
     // 8. Googleカレンダーに仮押さえ作成
     const eventDescription = `【未払い・請求書送信済】\nゲスト: ${name} (${email})\n人数: ${guests}名\n合計: ¥${totalPrice.toLocaleString()}\n有効期限: ${dueDate.toISOString()}\n請求書ID: ${invoiceId}\n\n※支払いが完了するとSquareから通知が来ます。`;
-    
+
     await calendar.events.insert({
       calendarId: CAL_DIRECT_ID,
       requestBody: {
