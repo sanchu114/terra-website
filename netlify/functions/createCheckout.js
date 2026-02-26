@@ -130,7 +130,12 @@ exports.handler = async (event) => {
     const orderId = orderRes.result.order.id;
 
     // 6. Square請求書作成（下書き状態で作成し、送信はしない）
-    // ※ dueDate (支払い期限) はここでは設定せず、オーナーが手動送信する際に設定させる、またはデフォルトで14日後等になる
+    // Square APIの仕様上、下書きでも dueDate (支払い期限) が必須のため、仮で14日後を設定します。
+    // （オーナーが手動で画面から送信する際に、必要に応じて日付を変更できます）
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 14);
+    const dueDateString = dueDate.toISOString().split('T')[0];
+
     const invoiceRes = await squareClient.invoicesApi.createInvoice({
       invoice: {
         locationId: SQUARE_LOCATION_ID,
@@ -140,8 +145,8 @@ exports.handler = async (event) => {
         },
         paymentRequests: [{
           requestType: 'BALANCE',
+          dueDate: dueDateString, // ★必須項目のエラーを解消するため追加
           automaticPaymentSource: 'NONE',
-          // 通知（リマインダー）の設定も自動送信しないため削除
         }],
         deliveryMethod: 'EMAIL', // 手動送信時にメールで送れるように設定は残す
         title: '【Terra】ご宿泊代金のお支払い',
