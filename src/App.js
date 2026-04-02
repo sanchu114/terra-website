@@ -38,7 +38,7 @@ const App = () => {
     "/assets/photos/bento.png",
     "/assets/photos/view.png",
     "/assets/photos/dining.png",
-    "/assets/photos/engawa.png",
+    "/assets/photos/bedroom.png",
     "/assets/photos/hero2.jpg",
     "/assets/photos/exterior.png",
   ];
@@ -427,7 +427,7 @@ const App = () => {
             </div>
             <div className="order-2 md:order-1">
               <div className="grid grid-cols-2 gap-4">
-                <img src="/assets/photos/engawa.png" alt="縁側" className="w-full h-40 object-cover rounded-sm" />
+                <img src="/assets/photos/bedroom.png" alt="寝室" className="w-full h-40 object-cover rounded-sm" />
                 <img src="/assets/photos/view.png" alt="2Fからの眺め" className="w-full h-40 object-cover rounded-sm" />
                 <img src="/assets/photos/dining.png" alt="ダイニング" className="w-full h-40 object-cover rounded-sm" />
                 <img src="/assets/photos/exterior.png" alt="外観" className="w-full h-40 object-cover rounded-sm" />
@@ -542,7 +542,7 @@ const App = () => {
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
             <div className="col-span-2 md:col-span-2 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(5)}>
-              <img src="/assets/photos/engawa.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <img src="/assets/photos/bedroom.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
             </div>
             <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(6)}>
