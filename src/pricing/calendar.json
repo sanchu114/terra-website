@@ -1,0 +1,1929 @@
+{
+  "_meta": {
+    "source": "Terra 料金テーブル v1.0 / 日付別カレンダー",
+    "spreadsheetId": "17YZGWOwfz2XWc5a1_lBin9Ka7L8gUq00_qF9JJJq47Y",
+    "rangeStart": "2026-07-01",
+    "rangeEnd": "2027-03-31",
+    "generatedFrom": "snapshot"
+  },
+  "rates": {
+    "2026-07-01": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-02": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-03": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-04": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-05": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-06": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-07": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-08": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-09": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-10": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-11": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-12": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-13": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-14": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-15": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-16": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-17": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-18": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-19": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2026-07-20": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2026-07-21": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-22": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-23": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-24": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-25": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-26": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-27": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-28": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-29": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-30": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-07-31": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-01": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-02": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-03": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-04": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-05": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-06": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-07": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-08": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊"
+    },
+    "2026-08-09": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊"
+    },
+    "2026-08-10": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊 / 祝前日"
+    },
+    "2026-08-11": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊 / 祝日"
+    },
+    "2026-08-12": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊"
+    },
+    "2026-08-13": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊"
+    },
+    "2026-08-14": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊"
+    },
+    "2026-08-15": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊"
+    },
+    "2026-08-16": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "お盆SP / Airbnbのみ最低2泊"
+    },
+    "2026-08-17": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-18": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-19": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-20": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-21": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-22": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-23": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-24": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-25": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-26": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-27": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-28": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-29": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-30": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-08-31": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-01": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-02": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-03": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-04": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-05": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-06": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-07": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-08": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-09": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-10": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-11": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-12": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-13": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-14": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-15": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-16": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-17": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-18": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-19": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "シルバーウィーク5連休(P適用)"
+    },
+    "2026-09-20": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "シルバーウィーク5連休(P適用) / 祝前日"
+    },
+    "2026-09-21": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "シルバーウィーク5連休(P適用) / 祝日"
+    },
+    "2026-09-22": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "シルバーウィーク5連休(P適用) / 祝日"
+    },
+    "2026-09-23": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": "シルバーウィーク5連休(P適用) / 祝日"
+    },
+    "2026-09-24": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-25": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-26": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-27": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-28": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-29": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-09-30": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-01": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-02": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-03": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-04": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-05": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-06": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-07": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-08": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-09": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-10": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-11": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2026-10-12": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2026-10-13": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-14": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-15": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-16": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-17": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-18": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-19": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-20": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-21": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-22": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-23": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-24": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-25": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-26": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-27": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-28": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-29": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-30": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-10-31": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-01": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-02": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2026-11-03": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2026-11-04": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-05": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-06": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-07": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-08": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-09": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-10": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-11": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-12": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-13": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-14": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-15": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-16": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-17": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-18": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-19": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-20": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-21": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-22": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2026-11-23": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2026-11-24": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-25": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-26": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-27": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-28": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-29": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-11-30": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-01": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-02": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-03": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-04": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-05": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-06": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-07": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-08": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-09": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-10": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-11": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-12": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-13": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-14": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-15": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-16": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-17": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-18": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-19": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-20": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-21": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-22": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-23": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-24": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-25": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-26": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-27": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2026-12-28": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊"
+    },
+    "2026-12-29": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊"
+    },
+    "2026-12-30": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊"
+    },
+    "2026-12-31": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊 / 祝前日"
+    },
+    "2027-01-01": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊 / 祝日"
+    },
+    "2027-01-02": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊"
+    },
+    "2027-01-03": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊"
+    },
+    "2027-01-04": {
+      "season": "SP",
+      "dayType": "全日",
+      "official": 24000,
+      "minNights": 2,
+      "note": "年末年始SP / Airbnbのみ最低2泊"
+    },
+    "2027-01-05": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-06": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-07": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-08": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-09": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-10": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2027-01-11": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2027-01-12": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-13": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-14": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-15": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-16": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-17": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-18": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-19": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-20": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-21": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-22": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-23": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-24": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-25": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-26": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-27": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-28": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-29": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-30": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-01-31": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-01": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-02": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-03": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-04": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-05": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-06": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-07": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-08": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-09": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-10": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2027-02-11": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2027-02-12": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-13": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-14": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-15": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-16": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-17": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-18": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-19": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-20": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-21": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-22": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2027-02-23": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2027-02-24": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-25": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-26": {
+      "season": "O",
+      "dayType": "金",
+      "official": 14000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-27": {
+      "season": "O",
+      "dayType": "土・祝前",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-02-28": {
+      "season": "O",
+      "dayType": "平日",
+      "official": 12000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-01": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-02": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-03": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-04": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-05": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-06": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-07": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-08": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-09": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-10": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-11": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-12": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-13": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-14": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-15": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-16": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-17": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-18": {
+      "season": "M",
+      "dayType": "平日",
+      "official": 15000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-19": {
+      "season": "M",
+      "dayType": "金",
+      "official": 17000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-20": {
+      "season": "M",
+      "dayType": "土・祝前",
+      "official": 22000,
+      "minNights": 1,
+      "note": "祝前日"
+    },
+    "2027-03-21": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2027-03-22": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": "祝日"
+    },
+    "2027-03-23": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-24": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-25": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-26": {
+      "season": "P",
+      "dayType": "金",
+      "official": 20000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-27": {
+      "season": "P",
+      "dayType": "土・祝前",
+      "official": 25000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-28": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-29": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-30": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    },
+    "2027-03-31": {
+      "season": "P",
+      "dayType": "平日",
+      "official": 18000,
+      "minNights": 1,
+      "note": ""
+    }
+  }
+}

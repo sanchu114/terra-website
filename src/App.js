@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 // 必要なアイコンをインポート
 import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, ChevronLeft, ChevronRight, CreditCard, Loader, Send } from 'lucide-react';
+// 料金計算（料金テーブルv1.0の写し calendar.json を参照）
+import { calcStay, RANGE_END } from './pricing/pricing';
 
 const App = () => {
   const BOOKING_PAUSED = false; // ←いまはtrue。再開するときfalse
@@ -11,7 +13,7 @@ const App = () => {
   const [bookingData, setBookingData] = useState({
     name: '', email: '', checkin: '', checkout: '', guests: 1, message: ''
   });
-  const [priceInfo, setPriceInfo] = useState({ total: 0, nights: 0, isLongStay: false });
+  const [priceInfo, setPriceInfo] = useState({ status: 'empty', total: 0, nights: 0, isLongStay: false });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
 
@@ -73,33 +75,9 @@ const App = () => {
     };
   }, []);
 
-  // 料金計算ロジック
+  // 料金計算ロジック（calendar.json = 料金テーブルv1.0の写しを参照）
   useEffect(() => {
-    if (bookingData.checkin && bookingData.checkout) {
-      const start = new Date(bookingData.checkin);
-      const end = new Date(bookingData.checkout);
-      const diffTime = end - start;
-      const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (nights > 0) {
-        let total = 0;
-        for (let i = 0; i < nights; i++) {
-          let d = new Date(start);
-          d.setDate(start.getDate() + i);
-          const day = d.getDay();
-          // 金(5), 土(6), 日(0) は休日料金 22,000円、その他: 15,000円 (1〜2名ベース)
-          const dailyRate = (day === 5 || day === 6 || day === 0) ? 22000 : 15000;
-          total += dailyRate;
-        }
-        // 3名様目以降、お一人様あたり +5,000円
-        if (bookingData.guests > 2) {
-          total += (bookingData.guests - 2) * 5000 * nights;
-        }
-        setPriceInfo({ total, nights, isLongStay: nights >= 5 });
-      } else {
-        setPriceInfo({ total: 0, nights: 0, isLongStay: false });
-      }
-    }
+    setPriceInfo(calcStay(bookingData));
   }, [bookingData.checkin, bookingData.checkout, bookingData.guests]);
 
   // モーダル操作関数
@@ -215,6 +193,9 @@ const App = () => {
 
   // 今日日付
   const today = new Date().toISOString().split('T')[0];
+  // 自動見積もりが出せない（=問い合わせに回す）ケース：長期滞在 or カレンダー範囲外
+  const requiresInquiry = priceInfo.isLongStay || priceInfo.status === 'out_of_range';
+  const isOutOfRange = priceInfo.status === 'out_of_range';
 
   return (
     <div className="min-h-screen bg-[#FDFCF8] text-stone-800 font-sans selection:bg-[#4A5D23] selection:text-white">
@@ -618,23 +599,29 @@ const App = () => {
 
           <div className="mb-12 max-w-4xl mx-auto">
             <div className="bg-white/10 border border-white/20 p-8 rounded-sm text-center">
-              <div className="inline-flex items-center justify-center gap-2 mb-6 text-[#A8B692]">
+              <div className="inline-flex items-center justify-center gap-2 mb-2 text-[#A8B692]">
                 <Home size={24} />
                 <span className="font-bold tracking-widest text-lg">BASIC RATE (素泊まり・税込)</span>
               </div>
+              <p className="text-xs opacity-60 mb-6">1〜2名様まで同一料金。日程により下記の範囲で変動します。</p>
 
-              <div className="grid md:grid-cols-2 gap-8 text-left max-w-3xl mx-auto mb-8 divide-y md:divide-y-0 md:divide-x divide-white/20">
-                <div className="pt-4 md:pt-0 md:pr-8 text-center md:text-left">
-                  <p className="text-sm text-[#A8B692] font-bold mb-2">平日（月〜木）</p>
-                  <p className="text-4xl font-sans font-medium break-keep whitespace-nowrap mb-1">15,000円 <span className="text-sm font-normal opacity-70">/ 泊</span></p>
-                  <p className="text-xs opacity-60">※1〜2名様まで同一料金</p>
-                </div>
-                <div className="pt-4 md:pt-0 md:pl-8 text-center md:text-left">
-                  <p className="text-sm text-[#A8B692] font-bold mb-2">金・土・日・祝前日</p>
-                  <p className="text-4xl font-sans font-medium break-keep whitespace-nowrap mb-1">22,000円 <span className="text-sm font-normal opacity-70">/ 泊</span></p>
-                  <p className="text-xs opacity-60">※1〜2名様まで同一料金</p>
-                </div>
+              <div className="overflow-x-auto max-w-2xl mx-auto mb-6">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="text-[#A8B692] border-b border-white/20 text-sm">
+                      <th className="py-2 px-2 text-center font-bold whitespace-nowrap">平日<span className="block font-normal opacity-70 text-xs">日〜金</span></th>
+                      <th className="py-2 px-2 text-center font-bold whitespace-nowrap">土・祝前日</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="align-baseline">
+                      <td className="py-4 px-2 text-center"><span className="text-2xl font-medium whitespace-nowrap">12,000<span className="text-sm opacity-70">〜24,000</span></span><span className="block text-xs opacity-60 mt-0.5">円 / 泊</span></td>
+                      <td className="py-4 px-2 text-center"><span className="text-2xl font-medium whitespace-nowrap">17,000<span className="text-sm opacity-70">〜25,000</span></span><span className="block text-xs opacity-60 mt-0.5">円 / 泊</span></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+              <p className="text-xs opacity-60 max-w-2xl mx-auto mb-8">※GW・お盆・年末年始は全日24,000円の特別期です。正確な金額は下のカレンダーで日程を選ぶと自動表示されます。</p>
 
               <div className="bg-white/5 p-6 rounded-sm text-left max-w-3xl mx-auto mb-6">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
@@ -644,7 +631,7 @@ const App = () => {
                   <div className="flex-1 text-center md:text-left">
                     <span className="font-bold block text-[#A8B692] text-base mb-1">3名様以上でのご利用</span>
                     <p className="text-lg">3名様以降、お一人様あたり <span className="font-bold text-2xl text-white break-keep whitespace-nowrap">+5,000円</span> / 泊</p>
-                    <p className="text-sm opacity-60 mt-1">例）平日3名様利用の場合：合計 20,000円 / 泊</p>
+                    <p className="text-sm opacity-60 mt-1">例）3名様は基本料金＋5,000円、4名様は＋10,000円 / 泊</p>
                   </div>
                 </div>
               </div>
@@ -652,7 +639,7 @@ const App = () => {
               <div className="text-xs opacity-60 space-y-1 max-w-3xl mx-auto text-left">
                 <p>※1名様のご利用も可能ですが、料金は上記と同一となります。</p>
                 <p>※5泊以上の長期滞在・ワーケーションは割引相談可。お問い合わせください。</p>
-                <p>※出張・ビジネス利用の方は、じゃらんnetからもご予約いただけます（ポイント・経費精算対応）。</p>
+                <p>※1名様でのご出張は、じゃらんnet限定の出張プランがお得です。</p>
               </div>
             </div>
           </div>
@@ -731,7 +718,7 @@ const App = () => {
                     name="booking"
                     method="POST"
                     data-netlify="true"
-                    onSubmit={priceInfo.isLongStay ? handleInquirySubmit : handleCheckout}
+                    onSubmit={requiresInquiry ? handleInquirySubmit : handleCheckout}
                     className="space-y-4"
                   >
                     <input type="hidden" name="form-name" value="booking" />
@@ -773,13 +760,16 @@ const App = () => {
                         <div>
                           <div className="flex justify-between items-end mb-2">
                             <span className="text-sm font-bold text-stone-600">{priceInfo.nights}泊 × {bookingData.guests}名</span>
-                            {priceInfo.isLongStay ? (
+                            {isOutOfRange ? (
+                              <span className="text-[#4A5D23] font-bold">要お問い合わせ</span>
+                            ) : priceInfo.isLongStay ? (
                               <span className="text-[#4A5D23] font-bold">長期割引対象</span>
                             ) : (
                               <span className="text-2xl font-bold text-[#4A5D23]">¥{priceInfo.total.toLocaleString()}</span>
                             )}
                           </div>
-                          {priceInfo.isLongStay && <p className="text-xs text-stone-500">※5泊以上の長期滞在は、特別割引にてご案内いたします。下記ボタンよりお問い合わせください。</p>}
+                          {isOutOfRange && <p className="text-xs text-stone-500">※ご指定の期間は料金カレンダーの公開範囲外のため、自動見積もりを表示できません。下記ボタンよりお問い合わせください。折り返し料金をご案内します。</p>}
+                          {!isOutOfRange && priceInfo.isLongStay && <p className="text-xs text-stone-500">※5泊以上の長期滞在は、特別割引にてご案内いたします。下記ボタンよりお問い合わせください。</p>}
                         </div>
                       ) : (
                         <p className="text-xs text-stone-400 text-center">日程を選択すると見積もりが表示されます</p>
@@ -811,10 +801,12 @@ const App = () => {
                     <button
                       type="submit"
                       disabled={checkoutLoading}
-                      className={`w-full text-white py-3 rounded-sm transition-colors font-bold tracking-wider flex items-center justify-center gap-2 ${priceInfo.isLongStay ? 'bg-[#A8B692] hover:bg-[#8F9E7A]' : 'bg-[#4A5D23] hover:bg-[#3A4A1C]'}`}
+                      className={`w-full text-white py-3 rounded-sm transition-colors font-bold tracking-wider flex items-center justify-center gap-2 ${requiresInquiry ? 'bg-[#A8B692] hover:bg-[#8F9E7A]' : 'bg-[#4A5D23] hover:bg-[#3A4A1C]'}`}
                     >
                       {checkoutLoading ? (
                         <Loader className="animate-spin" size={20} />
+                      ) : isOutOfRange ? (
+                        <>お問い合わせ（料金確認） <Mail size={18} /></>
                       ) : priceInfo.isLongStay ? (
                         <>お問い合わせ（長期割引） <Mail size={18} /></>
                       ) : (
@@ -823,7 +815,7 @@ const App = () => {
                     </button>
 
                     <p className="text-[10px] text-center text-stone-400">
-                      {priceInfo.isLongStay ? "※長期滞在のご相談として送信されます" : "※空室確認後、お支払いのご案内をお送りします"}
+                      {requiresInquiry ? "※ご相談として送信されます" : "※空室確認後、お支払いのご案内をお送りします"}
                     </p>
                   </form>
                 )}
