@@ -19,7 +19,20 @@ const squareClient = new Client({
   environment: Environment.Production,
 });
 
-// 料金計算ロジック（適正価格・ベストレート体系）
+// 料金計算ロジック（料金テーブルv1.0の写し calendar.json を参照）
+// ※フロント src/pricing/calcStay.js と同じ計算。曜日・季節はコードで判定せず、
+//   calendar.json（日付別カレンダーのスナップショット）だけを正とする。
+const calendarData = require('../../src/pricing/calendar.json');
+const RATES = calendarData.rates;
+
+// Date → "2026-08-08"
+const toKey = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 const calculatePrice = (checkin, checkout, guests) => {
   const start = new Date(checkin);
   const end = new Date(checkout);
@@ -31,19 +44,17 @@ const calculatePrice = (checkin, checkout, guests) => {
   for (let i = 0; i < nights; i++) {
     let d = new Date(start);
     d.setDate(start.getDate() + i);
-    const day = d.getDay();
-    // 金(5), 土(6), 日(0) は休日料金 22,000円、それ以外は 15,000円
-    // ※1〜2名様までのベース料金
-    if (day === 5 || day === 6 || day === 0) {
-      totalBasePrice += 22000;
-    } else {
-      totalBasePrice += 15000;
+    const row = RATES[toKey(d)];
+    if (!row || row.official == null) {
+      // カレンダー範囲外の日を含む → 自動請求は作らず、問い合わせへ誘導
+      return { totalPrice: 0, nights, outOfRange: true };
     }
+    totalBasePrice += row.official;
   }
 
   // 3名様目以降、お一人様あたり +5,000円
   const extraGuestPrice = guests > 2 ? (guests - 2) * 5000 * nights : 0;
-  return { totalPrice: totalBasePrice + extraGuestPrice, nights };
+  return { totalPrice: totalBasePrice + extraGuestPrice, nights, outOfRange: false };
 };
 
 exports.handler = async (event) => {
@@ -64,7 +75,13 @@ exports.handler = async (event) => {
     }
 
     // 1. 料金計算
-    const { totalPrice, nights } = calculatePrice(checkin, checkout, guests);
+    const { totalPrice, nights, outOfRange } = calculatePrice(checkin, checkout, guests);
+    if (outOfRange) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "ご指定の期間は料金カレンダーの公開範囲外のため、お問い合わせフォームよりご連絡ください。折り返し料金をご案内します。" }),
+      };
+    }
     if (nights >= 5) {
       return {
         statusCode: 400,
