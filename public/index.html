@@ -1,63 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
   <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-K26L6NB3MK"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-K26L6NB3MK');
-</script>
     <meta charset="utf-8" />
-    <!-- ロゴ画像 -->
-    <link rel="icon" href="%PUBLIC_URL%/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#2C3E28" />
+    <meta name="theme-color" content="#2c3e28" />
+    <link rel="icon" href="%PUBLIC_URL%/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600&display=swap" rel="stylesheet" />
 
-    <!-- SEO: 基本情報 -->
-    <title>Terra -Shimanami- | しまなみ海道・伯方島の一棟貸し古民家宿</title>
-    <meta name="description" content="暮らすように、泊まる。愛媛県今治市、しまなみ海道・伯方島の山間にある一棟貸し古民家宿「Terra（テラ）」。静かな島時間と地元・山中商店の温かいお食事で、長期滞在やワーケーションに最適です。" />
-    <meta name="keywords" content="伯方島, 宿泊, 古民家, 一棟貸し, しまなみ海道, 長期滞在, 山中商店, Terra, テラ" />
-
-    <!-- SNS（OGP）設定 -->
-    <meta property="og:title" content="Terra -Shimanami- | 伯方島の古民家宿" />
-    <meta property="og:description" content="風の音と鳥の声だけが聞こえる、大人の隠れ家。公式サイトからの予約が最安値です。" />
+    <title>Terra -Shimanami-｜伯方島の一棟貸し</title>
+    <meta name="description" content="愛媛県今治市・しまなみ海道の伯方島にある、1日1組限定の一棟貸し。約144㎡・4寝室・最大8名。公式サイトで空室と宿泊総額を確認できます。" />
+    <link rel="canonical" href="https://terra-shimanami.com/" />
+    <meta property="og:title" content="Terra -Shimanami-｜伯方島の一棟貸し" />
+    <meta property="og:description" content="暮らすように、泊まる。島の家を一棟まるごと。" />
     <meta property="og:image" content="https://terra-shimanami.com/ogp.png" />
     <meta property="og:url" content="https://terra-shimanami.com/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://terra-shimanami.com/ogp.png" />
 
-    <!-- ★重要：Tailwind CSS の読み込み（デザイン崩れを直す魔法） -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K26L6NB3MK"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', 'G-K26L6NB3MK', { anonymize_ip: true });
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VacationRental",
+        "name": "Terra -Shimanami-",
+        "url": "https://terra-shimanami.com/",
+        "image": "https://terra-shimanami.com/ogp.png",
+        "description": "愛媛県今治市・伯方島にある1日1組限定の一棟貸し",
+        "occupancy": { "@type": "QuantitativeValue", "maxValue": 8 },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "伯方町北浦甲1501-3",
+          "addressLocality": "今治市",
+          "addressRegion": "愛媛県",
+          "addressCountry": "JP"
+        }
+      }
+    </script>
   </head>
   <body>
-    <!-- JavaScriptが無効な環境（検索ロボットなど）向けの内容 -->
-    <noscript>
-      <div style="padding: 20px; font-family: sans-serif;">
-        <h1>簡易宿所 Terra -Shimanami-</h1>
-        <p>このサイトを正しく表示するにはJavaScriptを有効にしてください。</p>
-        <p>愛媛県今治市伯方町北浦甲1501-3</p>
-        <p>「暮らすように、泊まる。」しまなみ海道・伯方島の山間にある一棟貸し古民家宿。</p>
-      </div>
-    </noscript>
-    
+    <noscript><p style="padding:24px">このサイトを表示するにはJavaScriptを有効にしてください。</p></noscript>
     <div id="root"></div>
 
-    <!-- Netlify Forms -->
-    <form name="booking" netlify netlify-honeypot="bot-field" hidden>
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <input type="date" name="checkin" />
-      <input type="date" name="checkout" />
-      <input type="number" name="guests" />
+    <form name="booking" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="requestId" />
+      <input name="name" />
+      <input name="email" />
+      <input name="phone" />
+      <input name="checkin" />
+      <input name="checkout" />
+      <input name="adults" />
+      <input name="childCoSleeping" />
+      <input name="childWithBedding" />
+      <input name="arrivalTime" />
+      <input name="pantry" />
+      <input name="bbq" />
+      <textarea name="notes"></textarea>
+    </form>
+    <form name="consultation" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input name="bot-field" />
+      <input name="consultationKind" />
+      <input name="name" />
+      <input name="email" />
+      <input name="checkin" />
+      <input name="checkout" />
+      <input name="adults" />
+      <input name="childCoSleeping" />
+      <input name="childWithBedding" />
       <textarea name="message"></textarea>
     </form>
   </body>

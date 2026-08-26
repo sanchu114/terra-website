@@ -1,845 +1,396 @@
-import React, { useState, useEffect, useRef } from 'react';
-// 必要なアイコンをインポート
-import { Menu, X, MapPin, Wifi, Car, Home, CalendarCheck, Mail, ExternalLink, ArrowRight, Sparkles, Utensils, Sun, Laptop, AlertTriangle, Dog, CigaretteOff, Trash2, CheckCircle, Users, Coffee, ChevronLeft, ChevronRight, CreditCard, Loader, Send } from 'lucide-react';
-// 料金計算（料金テーブルv1.0の写し calendar.json を参照）
-import { calcStay, RANGE_END } from './pricing/pricing';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { calcStay } from './pricing/pricing';
+import { getGaClientId, track } from './analytics';
 
-const App = () => {
-  const BOOKING_PAUSED = false; // ←いまはtrue。再開するときfalse
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+const PHOTOS = [
+  { src: '/assets/photos/renewal/floor-plan.jpeg', alt: 'Terraの1階と2階の間取り図', caption: '1階・2階の間取り' },
+  { src: '/assets/photos/renewal/tv-room.jpeg', alt: '座卓とテレビのある1階和室', caption: '1階和室' },
+  { src: '/assets/photos/renewal/engawa.jpg', alt: '午後の光が差し込む1階の縁側と籐の座卓', caption: '1階の縁側' },
+  { src: '/assets/photos/renewal/kitchen-dining.jpg', alt: '青いタイルのキッチンと丸いダイニングテーブル', caption: 'ダイニングキッチン' },
+  { src: '/assets/photos/renewal/bedroom.png', alt: 'セミダブルベッドが2台ある2階ベッドルーム', caption: '2階ベッドルーム' },
+  { src: '/assets/photos/renewal/futon-room.jpg', alt: '敷布団を用意した畳敷きの和室', caption: '和室・敷布団' },
+  { src: '/assets/photos/renewal/entrance.jpg', alt: 'Terraの玄関', caption: '玄関' },
+  { src: '/assets/photos/renewal/bathroom.jpeg', alt: '浴槽と洗い場の全体が見える浴室', caption: '浴室' },
+  { src: '/assets/photos/renewal/toilet.jpg', alt: '1階のトイレ', caption: 'トイレ' },
+];
 
-  // 予約計算・決済関連 State
-  const [bookingData, setBookingData] = useState({
-    name: '', email: '', checkin: '', checkout: '', guests: 1, message: ''
-  });
-  const [priceInfo, setPriceInfo] = useState({ status: 'empty', total: 0, nights: 0, isLongStay: false });
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState('');
+const OTA_LINKS = [
+  { label: 'Airbnbで確認', href: 'https://www.airbnb.jp/rooms/42695042' },
+  { label: 'じゃらんで確認', href: 'https://www.jalan.net/yad389390/' },
+];
 
-  // フォーム送信ステータス: null -> submitting -> success_invoice (請求書送信完了) -> success_inquiry (問い合わせ完了)
-  const [formStatus, setFormStatus] = useState(null);
+const emptyGuest = {
+  name: '',
+  email: '',
+  phone: '',
+  arrivalTime: '',
+  pantry: '',
+  bbq: false,
+  notes: '',
+  agreed: false,
+};
 
-  // スライドショー & ギャラリー State
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+const yen = (value) => `${new Intl.NumberFormat('ja-JP').format(value)}円`;
+const dateLabel = (value) => {
+  if (!value) return '未選択';
+  const [year, month, day] = value.split('-').map(Number);
+  return `${year}年${month}月${day}日`;
+};
+const todayKey = () => {
+  const now = new Date();
+  return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+};
 
-  // ヒーロー画像のリスト（拡張子が混在しているので注意）
-  const heroImages = [
-    "/assets/photos/hero1.jpg",
-    "/assets/photos/hero2.jpg",
-    "/assets/photos/hero3.png",
-    "/assets/photos/hero4.png",
-  ];
+function Gallery({ initialIndex, onClose }) {
+  const [index, setIndex] = useState(initialIndex);
+  const photo = PHOTOS[index];
 
-  // ギャラリー画像のリスト
-  const galleryImages = [
-    "/assets/photos/hero1.jpg",
-    "/assets/photos/niwa.png",
-    "/assets/photos/bento.png",
-    "/assets/photos/view.png",
-    "/assets/photos/dining.png",
-    "/assets/photos/bedroom.png",
-    "/assets/photos/hero2.jpg",
-    "/assets/photos/exterior.png",
-  ];
-
-  // スライドショーのタイマー設定
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 8000);
-
-    return () => clearInterval(intervalId);
-  }, [heroImages.length]);
-
-  // スクロール検知 & 決済完了パラメータ検知
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+    const onKey = (event) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key === 'ArrowRight') setIndex((index + 1) % PHOTOS.length);
+      if (event.key === 'ArrowLeft') setIndex((index - 1 + PHOTOS.length) % PHOTOS.length);
     };
-    window.addEventListener('scroll', handleScroll);
-
-    // 決済完了で戻ってきた場合の処理（念のため残す）
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'success') {
-      alert('お支払いが完了しました！予約確定メールをお送りしますのでお待ちください。\n（カレンダーへの反映には時間がかかる場合があります）');
-      window.history.replaceState({}, document.title, "/");
-    }
-
+    document.body.classList.add('modal-open');
+    window.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      document.body.classList.remove('modal-open');
+      window.removeEventListener('keydown', onKey);
     };
-  }, []);
+  }, [index, onClose]);
 
-  // 料金計算ロジック（calendar.json = 料金テーブルv1.0の写しを参照）
+  return (
+    <div className="gallery-dialog" role="dialog" aria-modal="true" aria-label="施設写真">
+      <div className="gallery-dialog__top">
+        <strong>施設写真</strong>
+        <button type="button" onClick={onClose}>閉じる</button>
+      </div>
+      <div className="gallery-dialog__stage">
+        <button type="button" className="gallery-nav gallery-nav--prev" onClick={() => setIndex((index - 1 + PHOTOS.length) % PHOTOS.length)} aria-label="前の写真">‹</button>
+        <img src={photo.src} alt={photo.alt} />
+        <button type="button" className="gallery-nav gallery-nav--next" onClick={() => setIndex((index + 1) % PHOTOS.length)} aria-label="次の写真">›</button>
+      </div>
+      <div className="gallery-dialog__footer"><span>{photo.caption}</span><span>{index + 1} / {PHOTOS.length}</span></div>
+    </div>
+  );
+}
+
+function QuoteBreakdown({ quote }) {
+  return (
+    <div className="quote-breakdown">
+      <div><span>宿泊日程</span><strong>{quote.nights}泊</strong></div>
+      <div><span>宿泊人数</span><strong>{quote.totalGuests}名</strong></div>
+      {quote.extraGuestFee > 0 && <div><span>3名目以降の追加料金</span><strong>{yen(quote.extraGuestFee)}</strong></div>}
+      {quote.preschoolBeddingFee > 0 && <div><span>未就学児の寝具</span><strong>{yen(quote.preschoolBeddingFee)}</strong></div>}
+      {quote.discount > 0 && <div className="quote-discount"><span>連泊割引（15%）</span><strong>−{yen(quote.discount)}</strong></div>}
+      <div className="quote-total"><span>宿泊総額（税込）</span><strong>{yen(quote.total)}</strong></div>
+      <p>清掃費・サービス料を含みます。</p>
+    </div>
+  );
+}
+
+function Booking() {
+  const [search, setSearch] = useState({ checkin: '', checkout: '', adults: 2, childCoSleeping: 0, childWithBedding: 0 });
+  const [result, setResult] = useState({ status: 'idle' });
+  const [guest, setGuest] = useState(emptyGuest);
+  const [galleryViewed, setGalleryViewed] = useState(false);
+  const requestId = useRef(null);
+  const sectionRef = useRef(null);
+
+  const localQuote = useMemo(() => calcStay(search), [search]);
+  const totalGuests = Number(search.adults) + Number(search.childCoSleeping) + Number(search.childWithBedding);
+
   useEffect(() => {
-    setPriceInfo(calcStay(bookingData));
-  }, [bookingData.checkin, bookingData.checkout, bookingData.guests]);
+    const node = sectionRef.current;
+    if (!node || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !galleryViewed) {
+        track('view_booking');
+        setGalleryViewed(true);
+      }
+    }, { threshold: 0.25 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [galleryViewed]);
 
-  // モーダル操作関数
-  const openModal = (index) => {
-    setSelectedImageIndex(index);
-    setSelectedImage(galleryImages[index]);
-    document.body.style.overflow = 'hidden';
+  const setSearchValue = (event) => {
+    const { name, value } = event.target;
+    setSearch((current) => ({ ...current, [name]: name.includes('child') || name === 'adults' ? Number(value) : value }));
+    setResult({ status: 'idle' });
   };
 
-  const closeModal = () => {
-    setSelectedImage(null);
-    document.body.style.overflow = 'unset';
-  };
+  const checkAvailability = async (event) => {
+    event.preventDefault();
+    track('search_availability', { nights: localQuote.nights || 0, guest_count: totalGuests });
 
-  const nextImage = (e) => {
-    e.stopPropagation();
-    const nextIndex = selectedImageIndex === galleryImages.length - 1 ? 0 : selectedImageIndex + 1;
-    setSelectedImageIndex(nextIndex);
-    setSelectedImage(galleryImages[nextIndex]);
-  };
-
-  const prevImage = (e) => {
-    e.stopPropagation();
-    const prevIndex = selectedImageIndex === 0 ? galleryImages.length - 1 : selectedImageIndex - 1;
-    setSelectedImageIndex(prevIndex);
-    setSelectedImage(galleryImages[prevIndex]);
-  };
-
-  const navLinks = [
-    { name: 'コンセプト', href: '#concept' },
-    { name: 'お部屋・設備', href: '#rooms' },
-    { name: '注意事項', href: '#notes' },
-    { name: 'お食事', href: '#meals' },
-    { name: 'アクセス', href: '#access' },
-    { name: 'ご予約', href: '#contact' },
-  ];
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  // AI関連関数は削除されました
-
-  // ★修正：請求書発行処理
-  const handleCheckout = async (e) => {
-    e.preventDefault();
-    setCheckoutLoading(true);
-    setCheckoutError('');
-
-    // 1. Netlify Formsへ通知（オーナーへの通知用として裏側で送る）
-    // ※これをやっておくとNetlifyの管理画面にもログが残る
-    const form = e.target;
-    const formData = new FormData(form);
-    try {
-      await fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(formData).toString(),
-      });
-    } catch (err) {
-      console.error("Notification Error:", err);
+    if (localQuote.status === 'invalid' || localQuote.status === 'empty') {
+      setResult({ status: 'invalid', message: localQuote.message || '日程を入力してください。' });
+      return;
+    }
+    if (localQuote.status === 'consultation') {
+      setResult({ status: 'consultation', quote: localQuote, mode: 'long' });
+      return;
+    }
+    if (localQuote.status === 'out_of_range') {
+      track('quote_out_of_range');
+      setResult({ status: 'consultation', quote: localQuote, mode: 'unpriced' });
+      return;
     }
 
-    // 2. 請求書発行プログラム実行
+    setResult({ status: 'checking' });
+    try {
+      const response = await fetch('/.netlify/functions/checkAvailability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(search),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || '空室確認に失敗しました。');
+      if (data.status === 'unavailable') {
+        track('quote_unavailable');
+        setResult({ status: 'unavailable' });
+        return;
+      }
+      if (data.status === 'out_of_range') {
+        track('quote_out_of_range');
+        setResult({ status: 'consultation', quote: localQuote, mode: 'unpriced' });
+        return;
+      }
+      if (data.status === 'consultation') {
+        setResult({ status: 'consultation', quote: localQuote, mode: 'long' });
+        return;
+      }
+      track('quote_available', { nights: localQuote.nights, value: localQuote.total, currency: 'JPY' });
+      track('start_booking_request');
+      setResult({ status: 'available', quote: data.quote || localQuote });
+    } catch (error) {
+      track('quote_error');
+      setResult({ status: 'error', message: error.message });
+    }
+  };
+
+  const submitNetlifyForm = async (formName, values) => {
+    const body = new URLSearchParams({ 'form-name': formName, ...values });
+    await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString() });
+  };
+
+  const submitBooking = async (event) => {
+    event.preventDefault();
+    if (!requestId.current) requestId.current = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+    setResult((current) => ({ ...current, status: 'submitting' }));
+    track('submit_booking_request');
+    const gaClientId = await getGaClientId();
+    const payload = { ...search, ...guest, requestId: requestId.current, gaClientId };
+
     try {
       const response = await fetch('/.netlify/functions/createCheckout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData),
+        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Checkout API Error Status: ${response.status}`);
-        console.error(`Checkout API Response Body (First 100 chars): ${errorText.substring(0, 100)}`);
-        // JSONでない場合はtext()を投げるなどの処理
-        try {
-          const result = await JSON.parse(errorText);
-          throw new Error(result.message || '予約処理に失敗しました');
-        } catch (e) {
-          throw new Error(`サーバーから不正なレスポンスが返りました(Status: ${response.status})。Netlify以外の環境（npm start等）ではFunctionsは動作しません。`);
-        }
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 409) {
+        track('booking_request_error', { error_category: 'availability_conflict' });
+        setResult({ status: 'conflict' });
+        return;
       }
+      if (!response.ok) throw new Error(data.message || '予約リクエストを送信できませんでした。');
 
-      const result = await response.json();
-
-      // ★成功したら画面を切り替える（リダイレクトしない）
-      setFormStatus('success_invoice');
-      setCheckoutLoading(false);
-
+      submitNetlifyForm('booking', {
+        requestId: requestId.current,
+        name: guest.name,
+        email: guest.email,
+        phone: guest.phone,
+        checkin: search.checkin,
+        checkout: search.checkout,
+        adults: String(search.adults),
+        childCoSleeping: String(search.childCoSleeping),
+        childWithBedding: String(search.childWithBedding),
+        arrivalTime: guest.arrivalTime,
+        pantry: guest.pantry,
+        bbq: guest.bbq ? '希望' : '希望なし',
+        notes: guest.notes,
+      }).catch(() => {});
+      track('booking_request_success', { nights: localQuote.nights, value: localQuote.total, currency: 'JPY' });
+      setResult({ status: 'success', requestId: requestId.current });
     } catch (error) {
-      console.error(error);
-      setCheckoutError(error.message || "予期せぬエラーが発生しました");
-      setCheckoutLoading(false);
+      track('booking_request_error', { error_category: 'technical' });
+      setResult({ status: 'request_error', message: error.message, quote: localQuote });
     }
   };
 
-  // 長期滞在用問い合わせ送信
-  const handleInquirySubmit = (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const data = new FormData(form);
-    fetch("/", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(data).toString(),
-    })
-      .then(() => setFormStatus('success_inquiry'))
-      .catch((error) => alert("送信エラーが発生しました"));
+  const submitConsultation = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const values = Object.fromEntries(formData.entries());
+    setResult((current) => ({ ...current, status: 'consultation_sending' }));
+    try {
+      await submitNetlifyForm('consultation', values);
+      setResult({ status: 'consultation_success' });
+    } catch {
+      setResult({ status: 'consultation_error', quote: localQuote, mode: localQuote.status === 'consultation' ? 'long' : 'unpriced' });
+    }
   };
-
-  const handleChange = (e) => {
-    setBookingData({ ...bookingData, [e.target.name]: e.target.value });
-  };
-
-  // 今日日付
-  const today = new Date().toISOString().split('T')[0];
-  // 自動見積もりが出せない（=問い合わせに回す）ケース：長期滞在 or カレンダー範囲外
-  const requiresInquiry = priceInfo.isLongStay || priceInfo.status === 'out_of_range';
-  const isOutOfRange = priceInfo.status === 'out_of_range';
 
   return (
-    <div className="min-h-screen bg-[#FDFCF8] text-stone-800 font-sans selection:bg-[#4A5D23] selection:text-white">
-      {/* Netlify Forms用 Hidden Input */}
-      <form name="booking" netlify="true" hidden>
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <input type="date" name="checkin" />
-        <input type="date" name="checkout" />
-        <input type="number" name="guests" />
-        <textarea name="message"></textarea>
-      </form>
-
-      {/* 画像拡大モーダル */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-fade-in"
-          onClick={closeModal}
-        >
-          <button
-            className="absolute top-4 right-4 text-white/70 hover:text-white p-2"
-            onClick={closeModal}
-          >
-            <X size={32} />
-          </button>
-
-          <button
-            className="absolute left-4 text-white/50 hover:text-white p-2 hidden md:block"
-            onClick={prevImage}
-          >
-            <ChevronLeft size={48} />
-          </button>
-
-          <img
-            src={selectedImage}
-            alt="Enlarged view"
-            className="max-w-full max-h-[90vh] object-contain shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
-
-          <button
-            className="absolute right-4 text-white/50 hover:text-white p-2 hidden md:block"
-            onClick={nextImage}
-          >
-            <ChevronRight size={48} />
-          </button>
-
-          <div className="absolute bottom-4 text-white/60 text-sm tracking-widest">
-            {selectedImageIndex + 1} / {galleryImages.length}
-          </div>
-        </div>
-      )}
-
-      {/* ヘッダー */}
-      <header
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-[#2C3E28] text-white shadow-md py-3' : 'bg-transparent text-white py-5'
-          }`}
-      >
-        <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <img
-              src="/logo.png"
-              alt="Terra Logo"
-              className={`h-10 md:h-12 w-auto object-contain transition-all duration-300 ${scrolled ? 'brightness-0 invert' : ''}`}
-            />
-          </div>
-
-          <nav className="hidden md:flex gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-sm tracking-wider hover:text-[#A8B692] transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
-          </nav>
-
-          <button
-            className="md:hidden p-2 text-white"
-            onClick={toggleMenu}
-            aria-label="メニューを開く"
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+    <section id="booking" className="booking-wrap" aria-labelledby="booking-title" ref={sectionRef}>
+      <div className="container">
+        <div className="booking-heading">
+          <p className="eyebrow">OFFICIAL BOOKING</p>
+          <h2 id="booking-title">空室と料金を確認</h2>
+          <p>まず日程と人数だけで確認できます。お名前・連絡先は空室が確認できた後にご入力ください。</p>
         </div>
 
-        {/* モバイルメニュー */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-[#2C3E28] border-t border-[#4A5D23] animate-fade-in">
-            <div className="flex flex-col p-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="py-3 text-white border-b border-[#4A5D23] last:border-none"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.name}
-                </a>
-              ))}
+        <div className="booking-shell">
+          <form className="availability-form" onSubmit={checkAvailability}>
+            <div className="booking-fields booking-fields--dates">
+              <label>チェックイン<input type="date" name="checkin" min={todayKey()} value={search.checkin} onChange={setSearchValue} required /></label>
+              <label>チェックアウト<input type="date" name="checkout" min={search.checkin || todayKey()} value={search.checkout} onChange={setSearchValue} required /></label>
             </div>
+            <div className="booking-fields booking-fields--guests">
+              <label>大人・小学生<select name="adults" value={search.adults} onChange={setSearchValue}>{[1,2,3,4,5,6,7,8].map((n) => <option key={n} value={n}>{n}名</option>)}</select></label>
+              <label>未就学児・添い寝<select name="childCoSleeping" value={search.childCoSleeping} onChange={setSearchValue}>{[0,1,2,3,4,5,6,7].map((n) => <option key={n} value={n}>{n}名</option>)}</select></label>
+              <label>未就学児・寝具あり<select name="childWithBedding" value={search.childWithBedding} onChange={setSearchValue}>{[0,1,2,3,4,5,6,7].map((n) => <option key={n} value={n}>{n}名</option>)}</select></label>
+            </div>
+            <div className="booking-summary"><span>{localQuote.nights > 0 ? `${localQuote.nights}泊` : '—'}</span><span className={totalGuests > 8 ? 'is-error' : ''}>合計 {totalGuests} / 8名</span></div>
+            <button className="button button--primary button--wide" type="submit" disabled={result.status === 'checking'}>{result.status === 'checking' ? '確認しています…' : '空室と料金を確認'}</button>
+          </form>
+
+          <div className="booking-result" aria-live="polite">
+            {result.status === 'idle' && <p className="booking-placeholder">選択した日程の空室と、清掃費・サービス料を含む宿泊総額を表示します。</p>}
+            {result.status === 'invalid' && <div className="notice notice--error"><strong>入力内容をご確認ください</strong><p>{result.message}</p></div>}
+            {result.status === 'unavailable' && <div className="notice notice--error"><strong>この日程は満室です</strong><p>別の日程を選んで、もう一度空室をご確認ください。</p><button type="button" className="button button--ghost" onClick={() => setResult({ status: 'idle' })}>別の日程を探す</button></div>}
+            {result.status === 'error' && <div className="notice notice--error"><strong>空室情報を取得できませんでした</strong><p>時間をおいて、もう一度お試しください。</p><div className="button-row"><button type="button" className="button button--ghost" onClick={() => setResult({ status: 'idle' })}>もう一度試す</button>{OTA_LINKS.map((link) => <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" onClick={() => track('click_ota', { ota: link.label })}>{link.label}</a>)}</div></div>}
+            {(result.status === 'available' || result.status === 'submitting' || result.status === 'request_error') && (
+              <div className="request-panel">
+                <div className="notice notice--success"><strong>空室があります</strong><p>{dateLabel(search.checkin)}〜{dateLabel(search.checkout)}</p></div>
+                <QuoteBreakdown quote={result.quote || localQuote} />
+                <form className="request-form" onSubmit={submitBooking}>
+                  <h3>予約リクエスト</h3>
+                  <p>送信後に空室を最終確認し、24時間以内にお支払い方法をご案内します。</p>
+                  <div className="form-grid">
+                    <label>お名前<input name="name" autoComplete="name" value={guest.name} onChange={(e) => setGuest({ ...guest, name: e.target.value })} required /></label>
+                    <label>メールアドレス<input type="email" name="email" autoComplete="email" value={guest.email} onChange={(e) => setGuest({ ...guest, email: e.target.value })} required /></label>
+                    <label>電話番号 <small>任意</small><input type="tel" name="phone" autoComplete="tel" value={guest.phone} onChange={(e) => setGuest({ ...guest, phone: e.target.value })} /></label>
+                    <label>到着予定時刻<input type="time" name="arrivalTime" value={guest.arrivalTime} onChange={(e) => setGuest({ ...guest, arrivalTime: e.target.value })} required /></label>
+                  </div>
+                  <fieldset>
+                    <legend>山中商店の食事</legend>
+                    <p>予約時点でのご希望をお知らせください。詳細は予約完了後にご案内します。</p>
+                    <div className="choice-row">
+                      {[['yes','希望する'],['maybe','検討中'],['no','希望しない']].map(([value, label]) => <label key={value}><input type="radio" name="pantry" value={value} checked={guest.pantry === value} onChange={(e) => { setGuest({ ...guest, pantry: e.target.value }); track('pantry_interest', { choice: value }); }} required /><span>{label}</span></label>)}
+                    </div>
+                  </fieldset>
+                  <label className="check-line"><input type="checkbox" checked={guest.bbq} onChange={(e) => setGuest({ ...guest, bbq: e.target.checked })} /><span><strong>BBQグリルセットレンタルを希望（5,000円／回）</strong><small>詳細は「よくあるご質問」からご確認ください。</small></span></label>
+                  <label>その他のご希望 <small>任意</small><textarea rows="4" value={guest.notes} onChange={(e) => setGuest({ ...guest, notes: e.target.value })} placeholder="食物アレルギー、ベビーベッド・ハイチェア、小型犬同伴など" /></label>
+                  <p className="form-help">小型犬1匹まで事前相談で同伴できます。追加料金はありません。ケージ等はご持参ください。</p>
+                  <label className="check-line check-line--terms"><input type="checkbox" checked={guest.agreed} onChange={(e) => setGuest({ ...guest, agreed: e.target.checked })} required /><span><a href="#price">料金・キャンセル規定</a>と<a href="/privacy.html" target="_blank" rel="noopener noreferrer">個人情報の取り扱い</a>を確認しました</span></label>
+                  {result.status === 'request_error' && <div className="notice notice--error"><strong>送信できませんでした</strong><p>{result.message} 入力内容は保持されています。時間をおいて再度お試しください。</p></div>}
+                  <button className="button button--primary button--wide" type="submit" disabled={result.status === 'submitting'}>{result.status === 'submitting' ? '送信しています…' : '予約リクエストを送信'}</button>
+                </form>
+              </div>
+            )}
+            {result.status === 'conflict' && <div className="notice notice--error"><strong>送信前に満室となりました</strong><p>ご入力内容は保持しています。日程だけ変更して、再度空室をご確認ください。</p><button type="button" className="button button--ghost" onClick={() => setResult({ status: 'idle' })}>日程を変更する</button></div>}
+            {result.status === 'success' && <div className="notice notice--success success-panel"><strong>予約リクエストを受け付けました</strong><p>まだ予約確定ではありません。<br />24時間以内に、お支払いのご案内をメールでお送りします。<br />お支払い完了をもって予約確定です。</p><p>メールが見当たらない場合は、迷惑メールフォルダもご確認ください。</p><small>受付番号：{result.requestId}</small></div>}
+            {(result.status === 'consultation' || result.status === 'consultation_sending' || result.status === 'consultation_error') && (
+              <form className="consultation-form" onSubmit={submitConsultation}>
+                <h3>{result.mode === 'long' ? '30泊以上の滞在を相談' : 'この日程の料金を確認'}</h3>
+                <p>{result.mode === 'long' ? '長期滞在のお見積もりを、24時間以内にメールでご案内します。' : '料金カレンダーの公開範囲外です。料金を確認し、24時間以内にメールでご案内します。'}</p>
+                <input type="hidden" name="consultationKind" value={result.mode} />
+                <input type="hidden" name="checkin" value={search.checkin} />
+                <input type="hidden" name="checkout" value={search.checkout} />
+                <input type="hidden" name="adults" value={search.adults} />
+                <input type="hidden" name="childCoSleeping" value={search.childCoSleeping} />
+                <input type="hidden" name="childWithBedding" value={search.childWithBedding} />
+                <div className="consultation-summary"><span>{dateLabel(search.checkin)}〜{dateLabel(search.checkout)}</span><span>{localQuote.nights}泊・{totalGuests}名</span></div>
+                <div className="form-grid">
+                  <label>お名前<input name="name" required /></label>
+                  <label>メールアドレス<input type="email" name="email" required /></label>
+                </div>
+                <label>ご相談内容 <small>任意</small><textarea name="message" rows="4" /></label>
+                {result.status === 'consultation_error' && <div className="notice notice--error"><p>送信できませんでした。時間をおいて再度お試しください。</p></div>}
+                <button className="button button--primary button--wide" type="submit" disabled={result.status === 'consultation_sending'}>{result.status === 'consultation_sending' ? '送信しています…' : result.mode === 'long' ? 'この条件で相談する' : 'この条件で見積もりを依頼'}</button>
+              </form>
+            )}
+            {result.status === 'consultation_success' && <div className="notice notice--success success-panel"><strong>ご相談を受け付けました</strong><p>24時間以内にメールでご連絡します。</p></div>}
           </div>
-        )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(null);
+
+  return (
+    <>
+      <header className="site-header">
+        <div className="site-header__inner">
+          <a className="brand" href="#top" aria-label="Terra -Shimanami- トップ"><img src="/logo.png" alt="Terra -Shimanami-" /></a>
+          <nav className="desktop-nav" aria-label="メインナビゲーション"><a href="#rooms">施設</a><a href="#food">食事</a><a href="#price">料金</a><a href="#access">アクセス</a><a className="button button--primary" href="#booking">空室・料金確認</a></nav>
+          <button className="menu-button" type="button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-label="メニューを開く">{menuOpen ? '閉じる' : 'メニュー'}</button>
+        </div>
+        {menuOpen && <nav className="mobile-nav"><a href="#rooms" onClick={() => setMenuOpen(false)}>施設</a><a href="#food" onClick={() => setMenuOpen(false)}>食事</a><a href="#price" onClick={() => setMenuOpen(false)}>料金</a><a href="#access" onClick={() => setMenuOpen(false)}>アクセス</a><a href="#booking" onClick={() => setMenuOpen(false)}>空室・料金確認</a></nav>}
       </header>
 
-      {/* ヒーローセクション */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden bg-stone-900">
-        {heroImages.map((img, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-[3000ms] ease-in-out ${index === currentImageIndex ? 'opacity-60' : 'opacity-0'
-              }`}
-          >
-            <img
-              src={img}
-              alt={`Terra Slide ${index + 1}`}
-              className={`w-full h-full object-cover transition-transform duration-[10000ms] ease-linear ${index === currentImageIndex ? 'scale-110' : 'scale-100'
-                }`}
-            />
+      <main id="top">
+        <section className="hero">
+          <img className="hero__image" src="/assets/photos/hero1.jpg" alt="海に架かるしまなみ海道の橋" />
+          <div className="hero__shade" />
+          <div className="hero__copy"><p>1日1組限定・しまなみ海道 伯方島</p><h1>暮らすように、泊まる。</h1><p>島の家を一棟まるごと。気兼ねなく過ごす、静かな時間。</p><a className="button button--light" href="#booking">空室と料金を確認</a></div>
+        </section>
+
+        <div className="facts-strip"><div><strong>1日1組</strong><span>一棟貸し</span></div><div><strong>約144㎡</strong><span>2階建て</span></div><div><strong>最大8名</strong><span>4寝室</span></div><div><strong>伯方島IC</strong><span>車で約10分</span></div></div>
+
+        <Booking />
+
+        <section id="rooms" className="section container" aria-labelledby="rooms-title">
+          <div className="section__head"><p className="eyebrow">THE HOUSE</p><h2 id="rooms-title">一棟まるごと、島の家</h2><p>延床約144㎡の2階建て。寝室は4室あり、セミダブルベッド2台と敷布団6組をご用意しています。</p></div>
+          <div className="photo-grid">
+            <button className="photo-tile photo-tile--main" type="button" onClick={() => setGalleryIndex(0)}><img src={PHOTOS[0].src} alt={PHOTOS[0].alt} /><span>{PHOTOS[0].caption}</span></button>
+            {[1,2,3,4].map((index) => <button key={index} className="photo-tile" type="button" onClick={() => setGalleryIndex(index)}><img src={PHOTOS[index].src} alt={PHOTOS[index].alt} /><span>{PHOTOS[index].caption}</span></button>)}
+            <button className="gallery-open" type="button" onClick={() => setGalleryIndex(0)}>写真をすべて見る（9枚）</button>
           </div>
-        ))}
+          <div className="room-facts"><div><strong>寝室4室</strong><span>1階2室・2階2室</span></div><div><strong>寝具8名分</strong><span>セミダブルベッド2台・敷布団6組</span></div><div><strong>浴室1室</strong><span>浴槽・シャワーあり</span></div><div><strong>トイレ2か所</strong><span>1階・2階に各1か所</span></div></div>
+        </section>
 
-        <div className="relative z-10 text-center px-4 text-white max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight drop-shadow-lg">
-            暮らすように、<br />泊まる。
-          </h1>
-          <p className="text-base md:text-lg mb-12 leading-loose tracking-widest font-serif opacity-90 drop-shadow-md">
-            しまなみ海道・伯方島の山間にある一軒家。<br className="hidden md:block" />
-            聞こえるのは、風の音と鳥の声だけ。<br className="hidden md:block" />
-            何もしない時間を過ごすための、大人の隠れ家です。
-          </p>
-          <a href="#contact" className="inline-flex items-center gap-2 bg-[#4A5D23] hover:bg-[#3A4A1C] text-white px-8 py-3 rounded-sm transition-colors duration-300 tracking-widest text-sm shadow-lg">
-            ご予約・空室確認 <ArrowRight size={16} />
-          </a>
-        </div>
-      </section>
+        <section className="section container" aria-labelledby="amenity-title"><div className="section__head"><h2 id="amenity-title">設備・アメニティ</h2></div><div className="details-list">
+          <details open><summary>キッチン・食事</summary><div><ul><li>2口IH、冷蔵・冷凍庫、電子レンジ、電気ケトル、炊飯器</li><li>基本的な調理器具、食器・カトラリー、食器用洗剤</li></ul></div></details>
+          <details><summary>浴室・洗面</summary><div><ul><li>シャンプー、コンディショナー、ボディソープ、洗顔料</li><li>ハンドソープ、ドライヤー、歯ブラシ、カミソリ</li><li>バスタオル・フェイスタオル</li><li>くし・ブラシ、シャワーキャップ、パジャマはありません</li></ul></div></details>
+          <details><summary>洗濯・長期滞在</summary><div><ul><li>洗濯機、洗濯洗剤、ハンガー・物干し用品</li><li>乾燥機はありません</li><li>無料の光回線Wi-Fi</li></ul></div></details>
+          <details><summary>空調・共用設備</summary><div><ul><li>エアコン（3部屋）</li><li>テレビ、ボードゲーム</li></ul></div></details>
+          <details><summary>子ども向け</summary><div><ul><li>ベビーベッド・ハイチェアは事前連絡要</li><li>未就学児は添い寝無料、寝具利用は1名1泊2,500円</li><li>子ども用食器はありません</li></ul></div></details>
+        </div></section>
 
-      {/* コンセプト */}
-      <section id="concept" className="py-20 md:py-32 px-4 bg-white">
-        <div className="container mx-auto max-w-5xl">
-          <div className="flex flex-col md:flex-row gap-12 items-center">
-            <div className="md:w-1/2 space-y-6">
-              <span className="text-[#4A5D23] font-bold tracking-widest text-sm block mb-2">CONCEPT</span>
-              <h2 className="text-3xl md:text-4xl font-serif text-stone-800 leading-snug">
-                大地に還る時間。<br />心ほどける、島の日常。
-              </h2>
-              <p className="text-stone-600 leading-relaxed">
-                Terra（テラ）はラテン語で「大地」を意味します。広い縁側でただ過ぎゆく時を感じ、窓辺のハンモックで微睡む。目の前に広がる里山の風景が、忙しい日常を忘れさせてくれます。
-              </p>
-              <p className="text-stone-600 leading-relaxed">
-                観光地化を避け、古民家を最低限リノベーションした素朴な空間です。過度なサービスはありませんが、長期の業務渡航やワーケーションなど、「生活の安定」と「静かな時間」を最優先する方に選ばれています。
-              </p>
-            </div>
-            <div className="md:w-1/2">
-              <div className="relative">
-                <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                  <img src="/assets/photos/niwa.png" alt="Terraの庭" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
-                </div>
-                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FDFCF8] p-4 hidden md:block">
-                  <div className="w-full h-full border border-[#4A5D23] flex items-center justify-center text-[#4A5D23]">
-                    <span className="font-serif italic">Est. 2024</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <section id="food" className="section container" aria-labelledby="food-title"><div className="section__head"><h2 id="food-title">お食事</h2><p>朝食と夕食は、近隣の山中商店へ事前注文できます。</p></div><div className="food-feature"><figure><img src="/assets/photos/renewal/pantry-dinner.jpg" alt="揚げ物やいなり寿司などを盛り付けた3名分の夕食" /><figcaption>夕食の提供例（3名分）</figcaption></figure><div className="food-feature__content"><h3>山中商店の朝食・夕食</h3><p>1名分からご注文いただけます。</p><ul className="food-prices"><li><span>夕食</span><strong>1,300円／人</strong></li><li><span>朝食</span><strong>900円／人</strong></li><li><span>1泊セット（夕食＋朝食）</span><strong>2,000円／人</strong></li></ul><h4>ご予約とお支払い</h4><ul><li>前日17:00までに要予約</li><li>ご用意の可否は18:00までにご連絡します</li><li>チェックイン時に山中商店で現金払い</li><li>宿泊料金とは別会計</li><li>注文確定後の当日キャンセルは全額</li></ul><p className="food-note">内容・品数・器は、当日の仕入れ状況により変わります。<br />アレルギーがある場合は予約時にお知らせください。</p></div></div></section>
 
-      {/* お部屋と設備 */}
-      <section id="rooms" className="py-20 bg-[#F5F5F0]">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="text-center mb-16">
-            <span className="text-[#4A5D23] font-bold tracking-widest text-sm">ROOMS & FACILITIES</span>
-            <h2 className="text-3xl font-serif text-stone-800 mt-2">お部屋と設備</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-            {[
-              { icon: <Wifi size={24} />, title: "Free Wi-Fi", desc: "高速光回線" },
-              { icon: <Laptop size={24} />, title: "Work Space", desc: "静かな書斎・デスク" },
-              { icon: <Utensils size={24} />, title: "Kitchen", desc: "自炊を楽しむ広いDK" },
-              { icon: <Dog size={24} />, title: "Pet Friendly", desc: "小型犬OK（要連絡）" },
-            ].map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-sm shadow-sm text-center hover:shadow-md transition-shadow">
-                <div className="text-[#4A5D23] mb-3 flex justify-center">{item.icon}</div>
-                <h3 className="font-bold mb-1 text-stone-800">{item.title}</h3>
-                <p className="text-xs text-stone-500">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
-            <div className="order-1 md:order-2 space-y-6">
-              <h3 className="text-2xl font-serif text-stone-800">心ほどける特等席と、<br />暮らしを支える機能性</h3>
-              <div className="space-y-4">
-                <div className="border-l-2 border-[#4A5D23] pl-4">
-                  <h4 className="font-bold text-stone-800">1F 縁側とダイニング</h4>
-                  <p className="text-sm text-stone-600 mt-1">PC作業も可能な広いダイニングテーブル。IHコンロ（2口）、冷蔵庫、電子レンジ、調理器具一式を完備しており、地元の食材での自炊に最適です。</p>
-                </div>
-                <div className="border-l-2 border-[#4A5D23] pl-4">
-                  <h4 className="font-bold text-stone-800">2F くつろぎの寝室群</h4>
-                  <p className="text-sm text-stone-600 mt-1">セミダブルベッド2台、布団6組をご用意。最大8名様まで滞在可能です。窓辺にハンモックのある部屋や、静かに読書ができる洋室など、思い思いの場所でお過ごしください。</p>
-                </div>
-                <div className="border-l-2 border-[#4A5D23] pl-4">
-                  <h4 className="font-bold text-stone-800">長期滞在の快適さ</h4>
-                  <p className="text-sm text-stone-600 mt-1">洗濯機、ドライヤー、清潔なバス・トイレを完備。Wi-Fiも各室で利用可能です。派手さはありませんが、実用性を重視した空間です。</p>
-                </div>
-              </div>
-            </div>
-            <div className="order-2 md:order-1">
-              <div className="grid grid-cols-2 gap-4">
-                <img src="/assets/photos/bedroom.png" alt="寝室" className="w-full h-40 object-cover rounded-sm" />
-                <img src="/assets/photos/view.png" alt="2Fからの眺め" className="w-full h-40 object-cover rounded-sm" />
-                <img src="/assets/photos/dining.png" alt="ダイニング" className="w-full h-40 object-cover rounded-sm" />
-                <img src="/assets/photos/exterior.png" alt="外観" className="w-full h-40 object-cover rounded-sm" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <section id="price" className="section container" aria-labelledby="price-title"><div className="section__head section__head--wide"><h2 id="price-title">料金・キャンセル規定</h2><p>日程ごとの宿泊総額は、ページ上部の空室・料金確認で表示します。</p></div><div className="price-layout"><div><div className="table-card"><h3>1〜2名の基本料金（1泊）</h3><div className="table-scroll"><table><thead><tr><th>シーズン</th><th>日〜木</th><th>金</th><th>土・祝前日</th></tr></thead><tbody><tr><td>オフ</td><td>12,000円</td><td>14,000円</td><td>17,000円</td></tr><tr><td>ミドル</td><td>15,000円</td><td>17,000円</td><td>22,000円</td></tr><tr><td>ピーク</td><td>18,000円</td><td>20,000円</td><td>25,000円</td></tr><tr><td>スーパーピーク</td><td colSpan="3">曜日を問わず 24,000円</td></tr></tbody></table></div><ul><li>3名目以降：1名1泊5,000円</li><li>未就学児：添い寝無料、寝具利用は1名1泊2,500円</li><li>最大宿泊人数は、未就学児も含めて8人です</li><li>6〜29泊：宿泊総額から15%引き。30泊以上は個別見積もり</li><li>連泊中の清掃はありません</li><li>清掃費・サービス料込み、税込</li></ul></div><div className="table-card cancellation"><h3>キャンセル料</h3><div className="table-scroll"><table><thead><tr><th>キャンセルのご連絡</th><th>キャンセル料</th></tr></thead><tbody><tr><td>チェックイン日の7日前23:59まで</td><td>無料</td></tr><tr><td>6〜2日前</td><td>30%</td></tr><tr><td>前日</td><td>50%</td></tr><tr><td>当日・無連絡不泊</td><td>100%</td></tr></tbody></table></div></div></div><aside className="policy-card"><div><strong>予約の成立</strong><span>お支払い完了をもって確定します。</span></div><div><strong>空室確認</strong><span>予約リクエスト後、24時間以内にご案内します。</span></div><div><strong>お支払い期限</strong><span>請求書のご案内から原則48時間以内です。</span></div><div><strong>静粛時間・禁煙</strong><span>20:00以降は静かにお過ごしください。室内全面禁煙です。</span></div><div><strong>返金</strong><span>キャンセル料を差し引き、お支払い時と同じ方法へ返金します。返金処理はキャンセル確定後7営業日以内です。</span></div></aside></div></section>
 
-      {/* 注意事項セクション */}
-      <section id="notes" className="py-20 bg-white border-b border-stone-100">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-12">
-            <span className="text-[#4A5D23] font-bold tracking-widest text-sm">THINGS TO KNOW</span>
-            <h2 className="text-3xl font-serif text-stone-800 mt-2">知っておいていただきたいこと</h2>
-            <p className="text-stone-600 mt-4 max-w-2xl mx-auto">Terraは自然の中にある、素朴な一軒家です。お客様と私たちの双方が気持ちよく過ごせるよう、ご予約前にご確認ください。</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                <AlertTriangle size={24} />
-                <h3 className="font-bold text-lg text-stone-800">自然環境・虫について</h3>
-              </div>
-              <p className="text-sm text-stone-600 leading-relaxed">自然豊かな場所のため、野良猫や虫（クモやムカデなど）が出ることがあります。殺虫剤などは完備していますが、自然環境の一部としてご理解いただけない方のご予約はご遠慮ください。</p>
-            </div>
-            <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                <Utensils size={24} />
-                <h3 className="font-bold text-lg text-stone-800">お食事・買い物</h3>
-              </div>
-              <p className="text-sm text-stone-600 leading-relaxed">徒歩圏内に「山中商店」はありますが、近隣に飲食店や大型スーパーはありません。基本的に食材を持ち込んでの「自炊」がメインの滞在となります。</p>
-            </div>
-            <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                <Dog size={24} />
-                <h3 className="font-bold text-lg text-stone-800">ペットとの滞在</h3>
-              </div>
-              <p className="text-sm text-stone-600 leading-relaxed">小型犬のみ同伴可能です（追加料金なし）。中型・大型犬は受け入れ不可となります。必ずゲージをご持参の上、指定のスペースで管理をお願いいたします。</p>
-            </div>
-            <div className="bg-[#FDFCF8] p-8 border border-stone-200 rounded-sm">
-              <div className="flex items-center gap-3 mb-4 text-[#4A5D23]">
-                <div className="flex gap-2"><CigaretteOff size={24} /><Trash2 size={24} /></div>
-                <h3 className="font-bold text-lg text-stone-800">ハウスルール</h3>
-              </div>
-              <p className="text-sm text-stone-600 leading-relaxed">・室内は電子タバコ含め完全禁煙です（屋外に喫煙所あり）。<br />・滞在中の清掃、ゴミの分別・処理はゲスト様ご自身でお願いします。<br />・夜間（21時以降）はお静かにお願いします。</p>
-            </div>
-          </div>
-        </div>
-      </section>
+        <section className="section container" aria-labelledby="flow-title"><div className="section__head"><h2 id="flow-title">予約確定までの流れ</h2><p>予約リクエストの送信後、空室を最終確認します。お支払い完了をもって予約確定です。</p></div><div className="flow">{[['01','空室・料金確認','日程と人数だけで、空室と税込総額を確認します。'],['02','予約リクエスト','連絡先と食事・BBQなどの希望を送ります。'],['03','お支払いのご案内','空室を最終確認し、24時間以内にお支払い方法をご案内します。'],['04','お支払い・予約確定','お支払い完了後、予約確定をご連絡します。']].map(([n,h,p]) => <article key={n}><b>{n}</b><h3>{h}</h3><p>{p}</p></article>)}</div></section>
 
-      {/* お食事セクション */}
-      <section id="meals" className="py-20 bg-[#F9FAF6] border-y border-stone-100">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="flex flex-col md:flex-row gap-12 items-center">
-            <div className="md:w-1/2">
-              <div className="relative">
-                <div className="aspect-[4/3] bg-stone-200 rounded-sm overflow-hidden">
-                  <img src="/assets/photos/bento.png" alt="山中商店のお弁当イメージ" className="w-full h-full object-cover" />
-                </div>
-                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[#F9FAF6] p-4 hidden md:block">
-                  <div className="w-full h-full border border-[#4A5D23] flex flex-col items-center justify-center text-[#4A5D23]">
-                    <Utensils size={24} />
-                    <span className="text-xs font-bold mt-1">Homemade</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="md:w-1/2 space-y-6">
-              <span className="text-[#4A5D23] font-bold tracking-widest text-sm block mb-2">OPTIONAL MEALS</span>
-              <h2 className="text-3xl font-serif text-stone-800 leading-snug">島の日常を味わう、<br />手作りの朝食とお弁当。</h2>
-              <p className="text-stone-600 leading-relaxed">Terraの近隣にある「山中商店」にて、手作りのお弁当や朝食をご用意できます（要予約）。コンビニ弁当とは違う、家庭的な味とボリュームで、長期滞在中の健康と活力をサポートします。</p>
-              <div className="bg-white p-6 rounded-sm border border-stone-200 mt-4">
-                <h4 className="font-bold text-stone-800 mb-3 flex items-center gap-2"><Coffee size={18} className="text-[#4A5D23]" /> ご利用について</h4>
-                <ul className="text-sm text-stone-600 space-y-2">
-                  <li className="flex items-start gap-2"><span className="text-[#4A5D23] mt-1">●</span><span><strong>メニュー：</strong> 日替わり弁当、朝食セットなど</span></li>
-                  <li className="flex items-start gap-2"><span className="text-[#4A5D23] mt-1">●</span><span><strong>お支払い：</strong> 受け取り時に、山中商店へ直接現金等でお支払いください。</span></li>
-                  <li className="flex items-start gap-2"><span className="text-[#4A5D23] mt-1">●</span><span><strong>ご予約：</strong> ご宿泊予約時、または現地にてご相談ください。</span></li>
-                </ul>
-                <p className="text-xs text-stone-400 mt-4">※法人利用等で宿泊費とまとめての請求書払いをご希望の場合はご相談ください。</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <section id="access" className="section container" aria-labelledby="access-title"><div className="section__head"><h2 id="access-title">アクセス</h2><p>伯方島ICから車で約10分。島内の移動は車または自転車が便利です。</p></div><div className="access-layout"><div className="access-map"><iframe title="Terra -Shimanami- 周辺地図" src="https://www.google.com/maps?q=Terra%20-Shimanami-%20%E6%84%9B%E5%AA%9B%E7%9C%8C%E4%BB%8A%E6%B2%BB%E5%B8%82%E4%BC%AF%E6%96%B9%E7%94%BA%E5%8C%97%E6%B5%A6%E7%94%B21501-3&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><div className="access-map__meta"><address><strong>Terra -Shimanami-</strong><span>愛媛県今治市伯方町北浦甲1501-3</span></address><a href="https://maps.app.goo.gl/dcowbr5HjqgSd6Qf6" target="_blank" rel="noopener noreferrer">Googleマップで開く</a></div></div><div className="access-list"><div><strong>車でお越しの方</strong><span>しまなみ海道・伯方島ICから約10分です。</span></div><div><strong>駐車場</strong><span>1台・要予約。2台目は事前にご連絡ください。</span></div><div><strong>自転車でお越しの方</strong><span>敷地内に駐輪できます。</span></div><p>チェックイン方法と詳しい道順は、予約確定後にご案内します。</p></div></div></section>
 
-      {/* ギャラリーセクション */}
-      <section id="gallery" className="py-20 bg-white">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="text-center mb-12">
-            <span className="text-[#4A5D23] font-bold tracking-widest text-sm">GALLERY</span>
-            <h2 className="text-3xl font-serif text-stone-800 mt-2">島の時間、Terraの記憶。</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 auto-rows-[160px] md:auto-rows-[200px]">
-            <div className="col-span-2 row-span-1 md:row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(0)}>
-              <img src="/assets/photos/hero1.jpg" alt="Gallery 1" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(1)}>
-              <img src="/assets/photos/niwa.png" alt="Gallery 2" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(2)}>
-              <img src="/assets/photos/bento.png" alt="Gallery 3" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-2 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(3)}>
-              <img src="/assets/photos/view.png" alt="Gallery 4" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(4)}>
-              <img src="/assets/photos/dining.png" alt="Gallery 5" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-            <div className="col-span-2 md:col-span-2 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(5)}>
-              <img src="/assets/photos/bedroom.png" alt="Gallery 6" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(6)}>
-              <img src="/assets/photos/hero2.jpg" alt="Gallery 7" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-            <div className="col-span-1 md:col-span-1 row-span-1 md:row-span-1 overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => openModal(7)}>
-              <img src="/assets/photos/exterior.png" alt="Gallery 8" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            </div>
-          </div>
-        </div>
-      </section>
+        <section className="section container" aria-labelledby="faq-title"><div className="section__head"><h2 id="faq-title">よくあるご質問</h2></div><div className="faq-list">
+          <details><summary>予約リクエストと予約確定の違いは？</summary><div>リクエスト後に空室を最終確認し、お支払い方法をご案内します。お支払い完了をもって予約確定です。</div></details>
+          <details><summary>子どもの料金と人数の数え方は？</summary><div>未就学児は添い寝無料、寝具利用は1名1泊2,500円です。最大宿泊人数は、未就学児も含めて8人です。</div></details>
+          <details><summary>6泊以上の割引は自動で適用されますか？</summary><div>6〜29泊は宿泊総額から15%引きを自動計算します。30泊以上は個別見積もりです。</div></details>
+          <details><summary>食事はどう注文・支払いしますか？</summary><div>予約時に利用のご意向をお知らせください。予約完了後、詳細をご案内します。料金はチェックイン時に山中商店にて現金でお支払いください。</div></details>
+          <details><summary>BBQはできますか？</summary><div>BBQグリルセットを1回5,000円でレンタルできます。グリル、新品の焼き網、炭用トング、食材用トング2本、火消しバケツを含みます。炭・着火剤・食材はご持参ください。持込グリル・焚火台は利用できません。調理と火気利用は20:00までです。</div></details>
+          <details><summary>洗濯機と乾燥機はありますか？</summary><div>洗濯機、洗剤、物干し用品があります。乾燥機はありません。</div></details>
+          <details><summary>20:00以降のルールは？</summary><div>20:00以降は静かにお過ごしください。</div></details>
+          <details><summary>ベビーベッドはありますか？</summary><div>ベビーベッドとハイチェアは、事前にご連絡いただければご用意可能です。</div></details>
+        </div></section>
 
-      <section id="access" className="py-20 bg-[#F5F5F0]">
-        <div className="container mx-auto px-4 max-w-4xl text-center">
-          <span className="text-[#4A5D23] font-bold tracking-widest text-sm">ACCESS</span>
-          <h2 className="text-3xl font-serif text-stone-800 mt-2 mb-12">アクセス</h2>
-          <div className="bg-white p-8 md:p-12 border border-stone-200 rounded-sm shadow-sm">
-            <div className="flex flex-col items-center gap-4 mb-8">
-              <MapPin size={40} className="text-[#4A5D23]" />
-              <div><p className="text-lg font-bold text-stone-800">Terra -Shimanami-</p><p className="text-stone-600">〒794-2303 愛媛県今治市伯方町北浦甲1501-3</p></div>
-            </div>
+        <section className="closing"><div><h2>空室と料金を確認</h2><p>お名前を入力する前に、空室と宿泊総額が分かります。</p></div><a className="button button--light" href="#booking">空室と料金を確認</a></section>
+      </main>
 
-            <div className="w-full h-64 md:h-96 bg-stone-100 rounded-sm mb-8 overflow-hidden border border-stone-200 shadow-inner">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15001.718766085127!2d133.08585290656603!3d34.21415511207934!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35504f003ea8ae61%3A0x9483beb05b1df249!2sTerra%20-Shimanami-!5e1!3m2!1sja!2sjp!4v1764070070196!5m2!1sja!2sjp"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                title="Terra Location Map"
-              ></iframe>
-            </div>
-
-            <div className="mb-8">
-              <a
-                href="https://www.google.com/maps/search/?api=1&query=Terra+-Shimanami-"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-[#4A5D23] border border-[#4A5D23] px-6 py-2 rounded-full text-sm hover:bg-[#4A5D23] hover:text-white transition-colors"
-              >
-                <MapPin size={16} /> Googleマップアプリで見る
-              </a>
-              <p className="text-xs text-stone-400 mt-2">※地図が表示されない場合は上記ボタンをご利用ください</p>
-            </div>
-
-            <div className="flex flex-col md:flex-row justify-center gap-8 text-left max-w-2xl mx-auto">
-              <div className="flex-1">
-                <h4 className="font-bold text-stone-800 mb-2 border-b border-stone-300 pb-1">お車でお越しの方</h4>
-                <p className="text-sm text-stone-600 leading-relaxed">しまなみ海道「伯方島IC」から車で約10分。<br />県道50号線を北浦方面へ。<br />※駐車場1台分あり（要予約）</p>
-              </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-stone-800 mb-2 border-b border-stone-300 pb-1">周辺情報</h4>
-                <p className="text-sm text-stone-600 leading-relaxed">・スーパー/商店：山中商店（徒歩圏内）<br />・コンビニ：車で約5分<br />・道の駅 マリンオアシスはかた：車で10分<br /><span className="text-xs text-stone-500 mt-1 block">※飲食店・大型スーパーは近くにありません</span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 予約・お問い合わせセクション */}
-
-      <section id="contact" className="py-20 bg-[#2C3E28] text-white">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-serif mb-6">ご予約・空室確認</h2>
-            <p className="opacity-90 leading-relaxed max-w-2xl mx-auto">
-              公式サイトからのご予約が最もお得（ベストレート）です。<br />
-              手数料がかからない分、各予約サイトよりお安くご案内しております。
-            </p>
-          </div>
-
-          <div className="mb-12 max-w-4xl mx-auto">
-            <div className="bg-white/10 border border-white/20 p-8 rounded-sm text-center">
-              <div className="inline-flex items-center justify-center gap-2 mb-2 text-[#A8B692]">
-                <Home size={24} />
-                <span className="font-bold tracking-widest text-lg">BASIC RATE (素泊まり・税込)</span>
-              </div>
-              <p className="text-xs opacity-60 mb-6">1〜2名様まで同一料金。日程により下記の範囲で変動します。</p>
-
-              <div className="overflow-x-auto max-w-2xl mx-auto mb-6">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="text-[#A8B692] border-b border-white/20 text-sm">
-                      <th className="py-2 px-2 text-center font-bold whitespace-nowrap">平日<span className="block font-normal opacity-70 text-xs">日〜金</span></th>
-                      <th className="py-2 px-2 text-center font-bold whitespace-nowrap">土・祝前日</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="align-baseline">
-                      <td className="py-4 px-2 text-center"><span className="text-2xl font-medium whitespace-nowrap">12,000<span className="text-sm opacity-70">〜24,000</span></span><span className="block text-xs opacity-60 mt-0.5">円 / 泊</span></td>
-                      <td className="py-4 px-2 text-center"><span className="text-2xl font-medium whitespace-nowrap">17,000<span className="text-sm opacity-70">〜25,000</span></span><span className="block text-xs opacity-60 mt-0.5">円 / 泊</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-xs opacity-60 max-w-2xl mx-auto mb-8">※GW・お盆・年末年始は全日24,000円の特別期です。正確な金額は下のカレンダーで日程を選ぶと自動表示されます。</p>
-
-              <div className="bg-white/5 p-6 rounded-sm text-left max-w-3xl mx-auto mb-6">
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-                  <div className="bg-[#A8B692] p-3 rounded-full text-white shrink-0">
-                    <Users size={24} />
-                  </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <span className="font-bold block text-[#A8B692] text-base mb-1">3名様以上でのご利用</span>
-                    <p className="text-lg">3名様以降、お一人様あたり <span className="font-bold text-2xl text-white break-keep whitespace-nowrap">+5,000円</span> / 泊</p>
-                    <p className="text-sm opacity-60 mt-1">例）3名様は基本料金＋5,000円、4名様は＋10,000円 / 泊</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-xs opacity-60 space-y-1 max-w-3xl mx-auto text-left">
-                <p>※1名様のご利用も可能ですが、料金は上記と同一となります。</p>
-                <p>※5泊以上の長期滞在・ワーケーションは割引相談可。お問い合わせください。</p>
-                <p>※1名様でのご出張は、じゃらんnet限定の出張プランがお得です。</p>
-              </div>
-            </div>
-          </div>
-          {BOOKING_PAUSED ? (
-            <div className="bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl p-6 md:p-10">
-              <div className="text-center">
-                <h3 className="text-xl md:text-2xl font-bold text-[#4A5D23] mb-3">
-                  公式サイトからの予約受付を一時停止しています
-                </h3>
-                <p className="text-stone-600 leading-relaxed">
-                  システム調整のため、ただいま公式サイトの予約フォーム・空室カレンダーは停止中です。<br />
-                  ご予約は下のボタンから Airbnb / じゃらん をご利用ください。
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-8 md:gap-12 bg-white text-stone-800 rounded-lg overflow-hidden shadow-2xl">
-              {/* カレンダーエリア */}
-              <div className="p-6 md:p-8 bg-stone-50">
-                <h3 className="font-bold text-lg mb-4 text-[#4A5D23] flex items-center gap-2"><CalendarCheck size={20} /> 空室状況</h3>
-                <p className="text-xs text-stone-500 mb-4">
-                  空室状況の目安としてご覧ください（最新の空き状況はフォーム送信時に自動判定されます）。
-                </p>
-                <div className="aspect-[4/3] w-full bg-white border border-stone-200 rounded-sm overflow-hidden relative">
-                  <iframe
-                    src="https://calendar.google.com/calendar/embed?src=34be616fad496d75975b501fedd8982239235375b20c52a8502db3f22ef6e5cb%40group.calendar.google.com&ctz=Asia%2FTokyo"
-                    style={{ border: 0 }}
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    scrolling="no"
-                    title="Terra Availability Calendar">
-                  </iframe>
-                </div>
-                <div className="mt-4 text-xs text-stone-500 bg-white p-3 rounded border border-stone-100">
-                  <strong>ご予約の流れ（現在リクエスト予約となります）：</strong>
-                  <ol className="list-decimal list-inside mt-1 space-y-1">
-                    <li>右側のフォームから日付と人数を入力しリクエストを送信</li>
-                    <li>オーナーが空室状況を確認し、24時間以内にご返信します</li>
-                    <li>メールで届く<strong>決済リンクからお支払い</strong>いただき予約確定</li>
-                  </ol>
-                </div>
-              </div>
-
-              {/* 予約フォームエリア */}
-              <div className="p-6 md:p-8">
-                <h3 className="font-bold text-lg mb-6 text-[#4A5D23] flex items-center gap-2"><Mail size={20} /> 予約リクエスト</h3>
-
-                {formStatus === 'success_invoice' ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
-                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4"><CheckCircle size={32} /></div>
-                    <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">リクエスト送信完了（仮予約）</h4>
-                    <p className="text-stone-600 mb-4">
-                      ご予約のリクエストを受け付けました。<br />
-                      この時点では<strong>まだ予約は確定しておりません。</strong>
-                    </p>
-                    <p className="text-sm text-stone-500 bg-stone-100 p-3 rounded text-left">
-                      空室状況を確認の上、24時間以内にご登録いただいたメールアドレスへ<br />
-                      ご予約確定のご案内と決済リンクをお送りいたします。<br />
-                      メール内のリンクよりお支払いをお願いいたします。
-                    </p>
-                    <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
-                  </div>
-                ) : formStatus === 'success_inquiry' ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center py-10 animate-fade-in">
-                    <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4"><Mail size={32} /></div>
-                    <h4 className="text-xl font-bold mb-2 text-[#4A5D23]">お問い合わせ送信完了</h4>
-                    <p className="text-stone-600">
-                      お問い合わせありがとうございます。<br />
-                      長期滞在割引について、24時間以内にメールにて<br />ご連絡させていただきます。
-                    </p>
-                    <button onClick={() => setFormStatus(null)} className="mt-6 text-sm text-[#4A5D23] underline hover:text-[#3A4A1C]">戻る</button>
-                  </div>
-                ) : (
-                  <form
-                    name="booking"
-                    method="POST"
-                    data-netlify="true"
-                    onSubmit={requiresInquiry ? handleInquirySubmit : handleCheckout}
-                    className="space-y-4"
-                  >
-                    <input type="hidden" name="form-name" value="booking" />
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-stone-500 mb-1">チェックイン</label>
-                        <input
-                          type="date"
-                          name="checkin"
-                          required
-                          min={today} // 今日以降のみ
-                          onChange={handleChange}
-                          className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-stone-500 mb-1">チェックアウト</label>
-                        <input
-                          type="date"
-                          name="checkout"
-                          required
-                          min={bookingData.checkin || today} // チェックイン日以降のみ
-                          onChange={handleChange}
-                          className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-stone-500 mb-1">宿泊人数 (最大8名)</label>
-                      <select name="guests" onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n} value={n}>{n}名</option>)}
-                      </select>
-                    </div>
-
-                    <div className="bg-[#F9FAF6] p-4 rounded border border-stone-200 mt-4">
-                      {priceInfo.nights > 0 ? (
-                        <div>
-                          <div className="flex justify-between items-end mb-2">
-                            <span className="text-sm font-bold text-stone-600">{priceInfo.nights}泊 × {bookingData.guests}名</span>
-                            {isOutOfRange ? (
-                              <span className="text-[#4A5D23] font-bold">要お問い合わせ</span>
-                            ) : priceInfo.isLongStay ? (
-                              <span className="text-[#4A5D23] font-bold">長期割引対象</span>
-                            ) : (
-                              <span className="text-2xl font-bold text-[#4A5D23]">¥{priceInfo.total.toLocaleString()}</span>
-                            )}
-                          </div>
-                          {isOutOfRange && <p className="text-xs text-stone-500">※ご指定の期間は料金カレンダーの公開範囲外のため、自動見積もりを表示できません。下記ボタンよりお問い合わせください。折り返し料金をご案内します。</p>}
-                          {!isOutOfRange && priceInfo.isLongStay && <p className="text-xs text-stone-500">※5泊以上の長期滞在は、特別割引にてご案内いたします。下記ボタンよりお問い合わせください。</p>}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-stone-400 text-center">日程を選択すると見積もりが表示されます</p>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-stone-500 mb-1">お名前</label>
-                        <input type="text" name="name" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="山田 太郎" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-stone-500 mb-1">メールアドレス</label>
-                        <input type="email" name="email" required onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="example@email.com" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-stone-500 mb-1">メッセージ（任意）</label>
-                      <textarea name="message" rows="2" onChange={handleChange} className="w-full p-2 border border-stone-300 rounded focus:border-[#4A5D23] outline-none text-sm" placeholder="チェックイン予定時刻など"></textarea>
-                    </div>
-
-                    {checkoutError && (
-                      <div className="bg-red-50 text-red-600 p-3 rounded text-xs border border-red-200">
-                        <AlertTriangle size={14} className="inline mr-1" /> {checkoutError}
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={checkoutLoading}
-                      className={`w-full text-white py-3 rounded-sm transition-colors font-bold tracking-wider flex items-center justify-center gap-2 ${requiresInquiry ? 'bg-[#A8B692] hover:bg-[#8F9E7A]' : 'bg-[#4A5D23] hover:bg-[#3A4A1C]'}`}
-                    >
-                      {checkoutLoading ? (
-                        <Loader className="animate-spin" size={20} />
-                      ) : isOutOfRange ? (
-                        <>お問い合わせ（料金確認） <Mail size={18} /></>
-                      ) : priceInfo.isLongStay ? (
-                        <>お問い合わせ（長期割引） <Mail size={18} /></>
-                      ) : (
-                        <>リクエストを送信する（仮予約） <Send size={18} /></>
-                      )}
-                    </button>
-
-                    <p className="text-[10px] text-center text-stone-400">
-                      {requiresInquiry ? "※ご相談として送信されます" : "※空室確認後、お支払いのご案内をお送りします"}
-                    </p>
-                  </form>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="mt-12 text-center">
-            <p className="text-sm opacity-80 mb-4">即時予約はこちら（OTAサイト）</p>
-            <div className="flex justify-center gap-4 flex-wrap">
-              <a href="https://www.airbnb.jp/rooms/1559396243936791784?source_impression_id=p3_1764072846_P34Mc5WDV_W3hHb-" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF5A5F] border border-[#FF5A5F] px-6 py-2 rounded-full text-sm hover:bg-[#FF5A5F] hover:text-white transition-colors"><ExternalLink size={16} /> Airbnb</a>
-              <a href="https://www.jalan.net/yad315633/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF7500] border border-[#FF7500] px-6 py-2 rounded-full text-sm hover:bg-[#FF7500] hover:text-white transition-colors"><ExternalLink size={16} /> じゃらん</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="bg-[#1A2619] text-[#A8B692] py-8 text-sm">
-        <div className="container mx-auto px-4 text-center">
-          <p className="mb-4">Ehime Imabari Hakata Island</p>
-          <p>&copy; {new Date().getFullYear()} Terra. All Rights Reserved.</p>
-        </div>
-      </footer>
-    </div>
+      <footer><div className="footer-inner"><div className="footer-brand"><img src="/logo.png" alt="Terra -Shimanami-" /><p>愛媛県今治市・伯方島にある、1日1組限定の一棟貸し。約144㎡・4寝室・最大8名。</p></div><nav><a href="#price">料金・利用条件</a><a href="#price">キャンセル規定</a><a href="#access">アクセス</a><a href="#booking">予約リクエスト</a><a href="/privacy.html">個人情報の取り扱い</a></nav></div></footer>
+      <div className="mobile-cta"><a className="button button--primary" href="#booking">空室と料金を確認</a></div>
+      {galleryIndex !== null && <Gallery initialIndex={galleryIndex} onClose={() => setGalleryIndex(null)} />}
+    </>
   );
-};
+}
 
 export default App;

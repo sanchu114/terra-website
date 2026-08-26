@@ -1,0 +1,10 @@
+{
+  "maxGuests": 8,
+  "baseGuests": 2,
+  "extraGuestFeePerNight": 5000,
+  "preschoolBeddingFeePerNight": 2500,
+  "longStayDiscountStartNights": 6,
+  "longStayDiscountEndNights": 29,
+  "longStayDiscountRate": 0.15,
+  "consultationStartNights": 30
+}

@@ -15,7 +15,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "test": "react-scripts test --watchAll=false",
+    "test:pricing": "node --test src/pricing/calcStay.node-test.cjs",
+    "pricing:sync": "node scripts/generate_pricing_calendar.mjs",
+    "pricing:check": "node scripts/generate_pricing_calendar.mjs --local"
   },
   "browserslist": {
     "production": [
