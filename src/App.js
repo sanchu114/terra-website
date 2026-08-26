@@ -47,6 +47,16 @@ const todayKey = () => {
   const now = new Date();
   return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
 };
+export const openCheckoutPicker = (checkout, checkin) => {
+  if (!checkout || !checkin) return;
+  checkout.min = checkin;
+  checkout.focus();
+  try {
+    checkout.showPicker?.();
+  } catch {
+    // showPickerに未対応のブラウザでも、フォーカス移動は維持する。
+  }
+};
 
 function Gallery({ initialIndex, onClose }) {
   const [index, setIndex] = useState(initialIndex);
@@ -103,6 +113,7 @@ function Booking() {
   const [galleryViewed, setGalleryViewed] = useState(false);
   const requestId = useRef(null);
   const sectionRef = useRef(null);
+  const checkoutRef = useRef(null);
 
   const localQuote = useMemo(() => calcStay(search), [search]);
   const totalGuests = Number(search.adults) + Number(search.childCoSleeping) + Number(search.childWithBedding);
@@ -124,6 +135,18 @@ function Booking() {
     const { name, value } = event.target;
     setSearch((current) => ({ ...current, [name]: name.includes('child') || name === 'adults' ? Number(value) : value }));
     setResult({ status: 'idle' });
+  };
+
+  const setCheckinValue = (event) => {
+    const checkin = event.target.value;
+    setSearch((current) => ({
+      ...current,
+      checkin,
+      checkout: current.checkout && current.checkout <= checkin ? '' : current.checkout,
+    }));
+    setResult({ status: 'idle' });
+
+    openCheckoutPicker(checkoutRef.current, checkin);
   };
 
   const checkAvailability = async (event) => {
@@ -251,8 +274,8 @@ function Booking() {
         <div className="booking-shell">
           <form className="availability-form" onSubmit={checkAvailability}>
             <div className="booking-fields booking-fields--dates">
-              <label>チェックイン<input type="date" name="checkin" min={todayKey()} value={search.checkin} onChange={setSearchValue} required /></label>
-              <label>チェックアウト<input type="date" name="checkout" min={search.checkin || todayKey()} value={search.checkout} onChange={setSearchValue} required /></label>
+              <label>チェックイン<input type="date" name="checkin" min={todayKey()} value={search.checkin} onChange={setCheckinValue} required /></label>
+              <label>チェックアウト<input ref={checkoutRef} type="date" name="checkout" min={search.checkin || todayKey()} value={search.checkout} onChange={setSearchValue} required /></label>
             </div>
             <div className="booking-fields booking-fields--guests">
               <label>大人・小学生<select name="adults" value={search.adults} onChange={setSearchValue}>{[1,2,3,4,5,6,7,8].map((n) => <option key={n} value={n}>{n}名</option>)}</select></label>
@@ -279,7 +302,7 @@ function Booking() {
                     <label>お名前<input name="name" autoComplete="name" value={guest.name} onChange={(e) => setGuest({ ...guest, name: e.target.value })} required /></label>
                     <label>メールアドレス<input type="email" name="email" autoComplete="email" value={guest.email} onChange={(e) => setGuest({ ...guest, email: e.target.value })} required /></label>
                     <label>電話番号 <small>任意</small><input type="tel" name="phone" autoComplete="tel" value={guest.phone} onChange={(e) => setGuest({ ...guest, phone: e.target.value })} /></label>
-                    <label>到着予定時刻<input type="time" name="arrivalTime" value={guest.arrivalTime} onChange={(e) => setGuest({ ...guest, arrivalTime: e.target.value })} required /></label>
+                    <label>到着予定時刻<input type="time" name="arrivalTime" step="900" value={guest.arrivalTime} onChange={(e) => setGuest({ ...guest, arrivalTime: e.target.value })} required /></label>
                   </div>
                   <fieldset>
                     <legend>山中商店の食事</legend>
@@ -379,7 +402,15 @@ function App() {
           </div>
         </section>
 
-        <div className="facts-strip"><div><strong>1日1組</strong><span>一棟貸し</span></div><div><strong>約144㎡</strong><span>2階建て</span></div><div><strong>最大8名</strong><span>4寝室</span></div><div><strong>伯方島IC</strong><span>車で約10分</span></div></div>
+        <section className="facts" aria-label="施設の主要情報">
+          <div className="fact"><strong>一棟貸し</strong><span>約144㎡・2階建て</span></div>
+          <div className="fact"><strong>4寝室</strong><span>1階2室・2階2室</span></div>
+          <div className="fact"><strong>最大8名</strong><span>未就学児を含む総定員</span></div>
+          <div className="fact"><strong>キッチン</strong><span>2口IH・調理器具</span></div>
+          <div className="fact"><strong>洗濯機</strong><span>洗剤・物干し用品あり</span></div>
+          <div className="fact"><strong>光回線</strong><span>無料Wi-Fi</span></div>
+          <div className="fact"><strong>駐車1台</strong><span>2台目以降は要相談</span></div>
+        </section>
 
         <Booking />
 

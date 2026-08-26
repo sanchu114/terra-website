@@ -8,7 +8,7 @@ const safeText = (value, max = 500) => String(value || '').trim().slice(0, max);
 const validateRequest = (data) => {
   if (!/^[a-zA-Z0-9-]{16,80}$/.test(data.requestId || '')) return '受付番号が不正です。ページを再読み込みしてください。';
   if (!safeText(data.name, 100) || !/^\S+@\S+\.\S+$/.test(data.email || '')) return 'お名前とメールアドレスをご確認ください。';
-  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(data.arrivalTime || '')) return '到着予定時刻をご確認ください。';
+  if (!/^([01]\d|2[0-3]):(00|15|30|45)$/.test(data.arrivalTime || '')) return '到着予定時刻は15分単位で選択してください。';
   if (!['yes', 'maybe', 'no'].includes(data.pantry)) return '食事のご希望を選択してください。';
   if (data.agreed !== true) return '料金・キャンセル規定をご確認ください。';
   return null;
