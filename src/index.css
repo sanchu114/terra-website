@@ -58,11 +58,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .hero__pagination button { width: 32px; height: 32px; padding: 0; border: 0; display: grid; place-items: center; background: transparent; cursor: pointer; }
 .hero__pagination button::before { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.55); content: ""; transition: background .2s ease, transform .2s ease; }
 .hero__pagination button.is-active::before { background: #fff; transform: scale(1.45); }
-.facts-strip { width: var(--container); margin: 0 auto; display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 1px solid var(--line); }
-.facts-strip div { padding: 24px 18px; display: flex; flex-direction: column; text-align: center; border-right: 1px solid var(--line); }
-.facts-strip div:last-child { border-right: 0; }
-.facts-strip strong { font-size: 1rem; }
-.facts-strip span { color: var(--muted); font-size: .78rem; }
+.facts { width: var(--container); margin: 28px auto 0; padding: 0; display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); border-block: 1px solid var(--line); }
+.fact { min-height: 70px; padding: 18px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--line); }
+.fact:last-child { border-right: 0; }
+.fact strong { font-size: 1.2rem; font-weight: 600; }
+.fact span { color: var(--muted); font-size: .78rem; }
 
 .eyebrow { margin: 0 0 10px; color: var(--forest); font-size: .72rem; font-weight: 700; letter-spacing: .18em; }
 .section { padding-block: clamp(76px, 10vw, 132px); }
@@ -143,14 +143,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--forest); outline
 .room-facts strong { font-size: .85rem; }
 .room-facts span { color: var(--muted); font-size: .72rem; }
 
-.details-list { width: min(900px, 100%); border-top: 1px solid var(--line); }
-.details-list details, .faq-list details { border-bottom: 1px solid var(--line); }
-.details-list summary, .faq-list summary { padding: 20px 14px; position: relative; list-style: none; font-weight: 700; cursor: pointer; }
+.details-list { width: 100%; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.details-list details, .faq-list details { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+.details-list summary, .faq-list summary { min-height: 56px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 18px; list-style: none; font-weight: 800; cursor: pointer; }
 .details-list summary::-webkit-details-marker, .faq-list summary::-webkit-details-marker { display: none; }
-.details-list summary::after, .faq-list summary::after { content: "+"; position: absolute; right: 14px; color: var(--forest); }
+.details-list summary::after, .faq-list summary::after { content: "+"; color: var(--forest); font-size: 1.4rem; font-weight: 500; }
 .details-list details[open] summary::after, .faq-list details[open] summary::after { content: "−"; }
-.details-list details > div, .faq-list details > div { padding: 0 42px 20px 14px; color: var(--muted); }
-.details-list ul { margin: 0; padding-left: 18px; }
+.details-list details > div, .faq-list details > div { padding: 0 18px 18px; color: #566159; font-size: .86rem; }
+.details-list ul { margin: 0; padding-left: 1.2em; }
 
 .food-feature { display: grid; grid-template-columns: 1.08fr .92fr; gap: clamp(36px,6vw,78px); align-items: center; }
 .food-feature figure { margin: 0; }
@@ -199,7 +199,8 @@ thead { background: rgba(48,46,41,.035); }
 .access-list strong { font-size: .86rem; }
 .access-list span, .access-list > p { color: var(--muted); font-size: .78rem; }
 
-.faq-list { max-width: 900px; border-top: 1px solid var(--ink); }
+.faq-list { width: 100%; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 32px; border-top: 1px solid var(--line); }
+.faq-list details { align-self: start; }
 .faq-list details > div { line-height: 1.85; }
 .closing { padding: 54px max(20px,calc((100vw - 1160px)/2)); display: flex; align-items: center; justify-content: space-between; gap: 30px; color: #fff; background: var(--forest-deep); }
 .closing h2 { margin-bottom: 2px; }
@@ -222,6 +223,12 @@ footer { padding: 58px 0 92px; background: #232820; color: rgba(255,255,255,.74)
 .gallery-nav--prev { left: 0; }.gallery-nav--next { right: 0; }
 .gallery-dialog__footer { padding-top: 8px; color: rgba(255,255,255,.72); font-size: .78rem; }
 
+@media (max-width: 980px) {
+  .facts { grid-template-columns: repeat(4,minmax(0,1fr)); }
+  .fact:nth-child(4) { border-right: 0; }
+  .fact:nth-child(-n+4) { border-bottom: 1px solid var(--line); }
+}
+
 @media (max-width: 900px) {
   .desktop-nav { display: none; }
   .menu-button { display: block; }
@@ -240,6 +247,15 @@ footer { padding: 58px 0 92px; background: #232820; color: rgba(255,255,255,.74)
   .flow article:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
 }
 
+@media (max-width: 680px) {
+  .facts { width: 100%; margin-top: 14px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .fact { min-height: 74px; padding: 10px 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .fact:nth-child(even) { border-right: 0; }
+  .fact:nth-last-child(-n+2) { border-bottom: 0; }
+  .fact:last-child { grid-column: 1 / -1; border-right: 0; border-top: 1px solid var(--line); }
+  .faq-list { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 640px) {
   :root { --container: min(100% - 32px,1160px); }
   body { font-size: 15px; }
@@ -250,9 +266,6 @@ footer { padding: 58px 0 92px; background: #232820; color: rgba(255,255,255,.74)
   .hero__copy { padding-inline: 0; }
   .hero__copy h1 { font-size: clamp(1.65rem,8vw,2.2rem); letter-spacing: .02em; }
   .hero__copy p:last-of-type { max-width: 280px; margin-inline: auto; }
-  .facts-strip { width: 100%; grid-template-columns: repeat(2,1fr); }
-  .facts-strip div:nth-child(2) { border-right: 0; }
-  .facts-strip div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .section { padding-block: 72px; }
   .section__head h2, .booking-heading h2, .closing h2 { font-size: 1.72rem; }
   .booking-wrap { padding-block: 66px; }
