@@ -14,6 +14,13 @@ const PHOTOS = [
   { src: '/assets/photos/renewal/toilet.jpg', alt: '1階のトイレ', caption: 'トイレ' },
 ];
 
+const HERO_IMAGES = [
+  { src: '/assets/photos/hero1.jpg', alt: '海に架かるしまなみ海道の橋', label: 'しまなみ海道の橋' },
+  { src: '/assets/photos/renewal/entrance.jpg', alt: 'Terraの玄関', label: '玄関' },
+  { src: '/assets/photos/renewal/kitchen-dining.jpg', alt: '青いタイルのキッチンと丸いダイニングテーブル', label: 'ダイニングキッチン' },
+  { src: '/assets/photos/renewal/engawa.jpg', alt: '午後の光が差し込む1階の縁側', label: '縁側' },
+];
+
 const OTA_LINKS = [
   { label: 'Airbnbで確認', href: 'https://www.airbnb.jp/rooms/42695042' },
   { label: 'じゃらんで確認', href: 'https://www.jalan.net/yad389390/' },
@@ -323,6 +330,15 @@ function Booking() {
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(null);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    const intervalId = window.setInterval(() => {
+      setHeroIndex((current) => (current + 1) % HERO_IMAGES.length);
+    }, 8000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   return (
     <>
@@ -336,10 +352,31 @@ function App() {
       </header>
 
       <main id="top">
-        <section className="hero">
-          <img className="hero__image" src="/assets/photos/hero1.jpg" alt="海に架かるしまなみ海道の橋" />
+        <section className="hero" aria-label="Terraと伯方島の風景">
+          {HERO_IMAGES.map((image, index) => (
+            <img
+              key={image.src}
+              className={`hero__image${index === heroIndex ? ' is-active' : ''}`}
+              src={image.src}
+              alt={index === heroIndex ? image.alt : ''}
+              aria-hidden={index !== heroIndex}
+              loading={index === 0 ? 'eager' : 'lazy'}
+            />
+          ))}
           <div className="hero__shade" />
           <div className="hero__copy"><p>1日1組限定・しまなみ海道 伯方島</p><h1>暮らすように、泊まる。</h1><p>島の家を一棟まるごと。気兼ねなく過ごす、静かな時間。</p><a className="button button--light" href="#booking">空室と料金を確認</a></div>
+          <div className="hero__pagination" aria-label="ヒーロー写真を選ぶ">
+            {HERO_IMAGES.map((image, index) => (
+              <button
+                key={image.src}
+                type="button"
+                className={index === heroIndex ? 'is-active' : ''}
+                aria-label={`${index + 1}枚目：${image.label}`}
+                aria-current={index === heroIndex ? 'true' : undefined}
+                onClick={() => setHeroIndex(index)}
+              />
+            ))}
+          </div>
         </section>
 
         <div className="facts-strip"><div><strong>1日1組</strong><span>一棟貸し</span></div><div><strong>約144㎡</strong><span>2階建て</span></div><div><strong>最大8名</strong><span>4寝室</span></div><div><strong>伯方島IC</strong><span>車で約10分</span></div></div>
