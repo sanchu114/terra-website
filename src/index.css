@@ -69,6 +69,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .booking-wrap { padding: clamp(72px, 9vw, 108px) 0; background: var(--paper); border-bottom: 1px solid var(--line); }
 .booking-heading { max-width: 760px; margin-bottom: 34px; }
+.booking-heading > p span { display: block; }
 .booking-shell { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
 .availability-form { padding: 34px 36px 36px 0; border-right: 1px solid var(--line); }
 .booking-result { min-height: 380px; padding: 34px 0 36px 36px; }
