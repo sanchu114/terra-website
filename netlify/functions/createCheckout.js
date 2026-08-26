@@ -1,212 +1,140 @@
-// 予約停止フラグのチェックはハンドラー内で行います。
-
-const { google } = require('googleapis');
+const crypto = require('crypto');
 const { Client, Environment } = require('square');
-const { v4: uuidv4 } = require('uuid');
-const { parseISO, format, differenceInCalendarDays } = require('date-fns');
+const { json, calendarClient, calculateQuote, isAvailable } = require('./lib/booking');
 
-// 環境変数の読み込み
-const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN;
-const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID;
-const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
-// Netlify環境変数での改行コード対策
-const GOOGLE_PRIVATE_KEY = (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
-const CAL_DIRECT_ID = process.env.CAL_DIRECT_ID;
+const stableKey = (requestId, purpose) => crypto.createHash('sha256').update(`${requestId}:${purpose}`).digest('hex');
+const safeText = (value, max = 500) => String(value || '').trim().slice(0, max);
 
-// Squareクライアント初期化
-const squareClient = new Client({
-  accessToken: SQUARE_ACCESS_TOKEN,
-  environment: Environment.Production,
-});
-
-// 料金計算ロジック（料金テーブルv1.0の写し calendar.json を参照）
-// ※フロント src/pricing/calcStay.js と同じ計算。曜日・季節はコードで判定せず、
-//   calendar.json（日付別カレンダーのスナップショット）だけを正とする。
-const calendarData = require('../../src/pricing/calendar.json');
-const RATES = calendarData.rates;
-
-// Date → "2026-08-08"
-const toKey = (d) => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-};
-
-const calculatePrice = (checkin, checkout, guests) => {
-  const start = new Date(checkin);
-  const end = new Date(checkout);
-  const nights = differenceInCalendarDays(end, start);
-
-  if (nights < 1) throw new Error("宿泊日数が不正です");
-
-  let totalBasePrice = 0;
-  for (let i = 0; i < nights; i++) {
-    let d = new Date(start);
-    d.setDate(start.getDate() + i);
-    const row = RATES[toKey(d)];
-    if (!row || row.official == null) {
-      // カレンダー範囲外の日を含む → 自動請求は作らず、問い合わせへ誘導
-      return { totalPrice: 0, nights, outOfRange: true };
-    }
-    totalBasePrice += row.official;
-  }
-
-  // 3名様目以降、お一人様あたり +5,000円
-  const extraGuestPrice = guests > 2 ? (guests - 2) * 5000 * nights : 0;
-  return { totalPrice: totalBasePrice + extraGuestPrice, nights, outOfRange: false };
+const validateRequest = (data) => {
+  if (!/^[a-zA-Z0-9-]{16,80}$/.test(data.requestId || '')) return '受付番号が不正です。ページを再読み込みしてください。';
+  if (!safeText(data.name, 100) || !/^\S+@\S+\.\S+$/.test(data.email || '')) return 'お名前とメールアドレスをご確認ください。';
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(data.arrivalTime || '')) return '到着予定時刻をご確認ください。';
+  if (!['yes', 'maybe', 'no'].includes(data.pantry)) return '食事のご希望を選択してください。';
+  if (data.agreed !== true) return '料金・キャンセル規定をご確認ください。';
+  return null;
 };
 
 exports.handler = async (event) => {
-  if (process.env.BOOKING_PAUSED === "true") {
-    return { statusCode: 503, body: JSON.stringify({ message: "現在、公式サイトからの予約受付を一時停止しております。OTAサイトをご利用ください。" }) };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+  if (event.httpMethod !== 'POST') return json(405, { message: 'Method Not Allowed' });
+  if (process.env.BOOKING_PAUSED === 'true') return json(503, { message: '現在、公式サイトからの予約受付を一時停止しています。' });
 
   try {
-    const data = JSON.parse(event.body);
-    const { checkin, checkout, guests, name, email, message } = data;
+    const data = JSON.parse(event.body || '{}');
+    const validationError = validateRequest(data);
+    if (validationError) return json(400, { message: validationError });
 
-    if (!checkin || !checkout || !guests || !name || !email) {
-      return { statusCode: 400, body: JSON.stringify({ message: "入力内容に不備があります。" }) };
-    }
+    const quote = calculateQuote(data);
+    if (quote.status !== 'ok') return json(400, { message: 'この条件では自動受付できません。日程と人数をご確認ください。' });
 
-    // 1. 料金計算
-    const { totalPrice, nights, outOfRange } = calculatePrice(checkin, checkout, guests);
-    if (outOfRange) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "ご指定の期間は料金カレンダーの公開範囲外のため、お問い合わせフォームよりご連絡ください。折り返し料金をご案内します。" }),
-      };
-    }
-    if (nights >= 5) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "5泊以上の長期滞在は割引がありますので、お問い合わせフォームからご連絡ください。" }),
-      };
-    }
-
-    // 2. Googleカレンダー認証
-    const jwtClient = new google.auth.JWT(
-      GOOGLE_CLIENT_EMAIL,
-      null,
-      GOOGLE_PRIVATE_KEY,
-      ['https://www.googleapis.com/auth/calendar']
-    );
-    await jwtClient.authorize();
-    const calendar = google.calendar({ version: 'v3', auth: jwtClient });
-
-    // 3. 空き状況確認 (FreeBusy)
-    // 日本時間（JST）の0時基準での検索
-    const startJST = new Date(`${checkin}T00:00:00+09:00`).toISOString();
-    const endJST = new Date(`${checkout}T00:00:00+09:00`).toISOString();
-
-    const freeBusyResponse = await calendar.freebusy.query({
-      requestBody: {
-        timeMin: startJST,
-        timeMax: endJST,
-        items: [{ id: CAL_DIRECT_ID }] // 予約ブロック専用のカレンダー（CAL_BLOCK_ID）は廃止
-      }
+    const calendar = await calendarClient();
+    const calendarId = process.env.CAL_DIRECT_ID;
+    const duplicate = await calendar.events.list({
+      calendarId,
+      privateExtendedProperty: [`requestId=${data.requestId}`],
+      showDeleted: false,
+      maxResults: 1,
     });
-
-    const calendars = freeBusyResponse.data.calendars;
-    const busyDirect = calendars[CAL_DIRECT_ID]?.busy || [];
-
-    if (busyDirect.length > 0) {
-      return {
-        statusCode: 409, // 409: Conflict (重複)
-        body: JSON.stringify({ message: "申し訳ありません。選択された日程は既に埋まっています。" }),
-      };
+    const existing = duplicate.data.items?.[0];
+    if (existing) {
+      return json(200, { status: 'accepted', requestId: data.requestId, duplicate: true });
     }
 
-    // 4. Square顧客作成 (または検索)
-    const customerRes = await squareClient.customersApi.createCustomer({
+    if (!(await isAvailable(calendar, data.checkin, data.checkout))) {
+      return json(409, { status: 'unavailable', message: '選択された日程は満室となりました。' });
+    }
+
+    const squareToken = process.env.SQUARE_ACCESS_TOKEN;
+    const locationId = process.env.SQUARE_LOCATION_ID;
+    if (!squareToken || !locationId) throw new Error('Squareの接続設定が不足しています。');
+    const square = new Client({ accessToken: squareToken, environment: Environment.Production });
+
+    const name = safeText(data.name, 100);
+    const email = safeText(data.email, 200);
+    const phone = safeText(data.phone, 40).replace(/[^\d+]/g, '');
+    const notes = safeText(data.notes, 1200);
+    const pantryLabel = { yes: '希望する', maybe: '検討中', no: '希望しない' }[data.pantry];
+
+    const customerResponse = await square.customersApi.createCustomer({
+      idempotencyKey: stableKey(data.requestId, 'customer'),
       givenName: name,
       emailAddress: email,
-      note: "Terra Website Booking (Request)"
+      ...(phone ? { phoneNumber: phone } : {}),
+      note: `Terra公式予約 ${data.requestId}`,
     });
-    const customerId = customerRes.result.customer.id;
+    const customerId = customerResponse.result.customer.id;
 
-    // 5. Square注文作成
-    const orderRes = await squareClient.ordersApi.createOrder({
+    const orderResponse = await square.ordersApi.createOrder({
+      idempotencyKey: stableKey(data.requestId, 'order'),
       order: {
-        locationId: SQUARE_LOCATION_ID,
-        customerId: customerId,
+        locationId,
+        customerId,
+        referenceId: data.requestId.slice(0, 40),
         lineItems: [{
-          name: `Terra宿泊費 (${checkin}〜 ${nights}泊 ${guests}名)`,
+          name: `Terra宿泊費（${data.checkin}〜${data.checkout}・${quote.nights}泊）`,
           quantity: '1',
-          basePriceMoney: {
-            amount: BigInt(totalPrice),
-            currency: 'JPY'
-          }
-        }]
-      },
-      idempotencyKey: uuidv4()
-    });
-    const orderId = orderRes.result.order.id;
-
-    // 6. Square請求書作成（下書き状態で作成し、送信はしない）
-    // Square APIの仕様上、下書きでも dueDate (支払い期限) が必須のため、仮で14日後を設定します。
-    // （オーナーが手動で画面から送信する際に、必要に応じて日付を変更できます）
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 14);
-    const dueDateString = dueDate.toISOString().split('T')[0];
-
-    const invoiceRes = await squareClient.invoicesApi.createInvoice({
-      invoice: {
-        locationId: SQUARE_LOCATION_ID,
-        orderId: orderId,
-        primaryRecipient: {
-          customerId: customerId,
-        },
-        paymentRequests: [{
-          requestType: 'BALANCE',
-          dueDate: dueDateString, // ★必須項目のエラーを解消するため追加
-          automaticPaymentSource: 'NONE',
+          basePriceMoney: { amount: BigInt(quote.total), currency: 'JPY' },
         }],
-        deliveryMethod: 'EMAIL', // 手動送信時にメールで送れるように設定は残す
-        title: '【Terra】ご宿泊代金のお支払い',
-        description: `ご予約ありがとうございます。\n宿泊日: ${checkin} 〜 ${checkout} (${nights}泊)\n人数: ${guests}名\n\n本メールの「カードで支払う」ボタンより決済をお願いいたします。\n\n※決済完了をもって予約確定となります。\n※確定後、当日の入室方法やハウスルールを別途メールにてお送りいたします。`,
-        acceptedPaymentMethods: {
-          card: true,
-          squareGiftCard: false,
-          bankAccount: false
-        }
       },
-      idempotencyKey: uuidv4()
     });
+    const orderId = orderResponse.result.order.id;
 
-    // ※ ここにあった publishInvoice（自動送信処理）を削除し、無断でお客様へメールが飛ばないように修正。
-    const invoiceId = invoiceRes.result.invoice.id;
+    const dueDate = new Date();
+    dueDate.setUTCDate(dueDate.getUTCDate() + 2);
+    const dueDateString = dueDate.toISOString().slice(0, 10);
+    const invoiceResponse = await square.invoicesApi.createInvoice({
+      idempotencyKey: stableKey(data.requestId, 'invoice'),
+      invoice: {
+        locationId,
+        orderId,
+        primaryRecipient: { customerId },
+        paymentRequests: [{ requestType: 'BALANCE', dueDate: dueDateString, automaticPaymentSource: 'NONE' }],
+        deliveryMethod: 'EMAIL',
+        title: '【Terra】ご宿泊代金のお支払い',
+        description: `宿泊日：${data.checkin}〜${data.checkout}（${quote.nights}泊）\n人数：${quote.totalGuests}名\n\nお支払い完了をもって予約確定です。`,
+        acceptedPaymentMethods: { card: true, squareGiftCard: false, bankAccount: false },
+      },
+    });
+    const invoiceId = invoiceResponse.result.invoice.id;
 
-    // 7. Googleカレンダーへ予定の作成
-    // 確定時にもそのまま残せるように「HOLD」や「仮予約」の表記をやめ、自社サイト経由とわかるように[Direct]をつける
-    const eventDescription = `公式サイトからの予約リクエスト（未決済）\n\nゲスト: ${name} (${email})\n人数: ${guests}名\n合計予定額: ¥${totalPrice.toLocaleString()}\nSquare下書き請求書ID: ${invoiceId}\n\n※OTAと重複がなければSquareで請求書を送信してください。\nお断りする場合はこのカレンダー予定を削除してください。`;
+    const guestBreakdown = `大人・小学生 ${quote.adults}名／未就学児（添い寝）${quote.childCoSleeping}名／未就学児（寝具あり）${quote.childWithBedding}名`;
+    const eventDescription = [
+      '公式サイトからの予約リクエスト（未決済）',
+      '',
+      `ゲスト：${name}（${email}${phone ? `／${phone}` : ''}）`,
+      `人数：${guestBreakdown}`,
+      `到着予定：${data.arrivalTime}`,
+      `食事：${pantryLabel}`,
+      `BBQ：${data.bbq ? '希望' : '希望なし'}`,
+      notes ? `その他：${notes}` : '',
+      `宿泊総額：¥${quote.total.toLocaleString('ja-JP')}`,
+      `Square下書き請求書ID：${invoiceId}`,
+      '',
+      '空室を最終確認後、Square管理画面から請求書を送信してください。',
+    ].filter((line) => line !== '').join('\n');
 
     await calendar.events.insert({
-      calendarId: CAL_DIRECT_ID,
+      calendarId,
       requestBody: {
-        summary: `[Direct] ${name}様`,
+        summary: `[未決済・Direct] ${name}様`,
         description: eventDescription,
-        start: { date: checkin },
-        end: { date: checkout },
-        colorId: '8', // グレーのまま（色で未確定判別なども可能。不要ならデフォルト色になります）
+        start: { date: data.checkin },
+        end: { date: data.checkout },
+        colorId: '8',
+        extendedProperties: {
+          private: {
+            requestId: data.requestId,
+            invoiceId,
+            orderId,
+            totalPrice: String(quote.total),
+            gaClientId: safeText(data.gaClientId, 100),
+          },
+        },
       },
     });
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Booking request completed successfully" }),
-    };
-
+    return json(200, { status: 'accepted', requestId: data.requestId });
   } catch (error) {
-    console.error("Server Error:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: "予約処理中にエラーが発生しました: " + (error.message || JSON.stringify(error)) }),
-    };
+    console.error('Booking Request Error:', error);
+    return json(500, { message: '予約リクエストの処理中にエラーが発生しました。' });
   }
 };

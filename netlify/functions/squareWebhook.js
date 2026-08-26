@@ -1,77 +1,90 @@
-const { google } = require('googleapis');
 const { WebhooksHelper } = require('square');
+const { calendarClient } = require('./lib/booking');
 
-const GOOGLE_CLIENT_EMAIL = process.env.GOOGLE_CLIENT_EMAIL;
-const GOOGLE_PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
-const CAL_DIRECT_ID = process.env.CAL_DIRECT_ID;
-const SQUARE_WEBHOOK_SIGNATURE_KEY = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY;
+const text = (statusCode, body) => ({ statusCode, headers: { 'Content-Type': 'text/plain; charset=utf-8' }, body });
+
+const verifySignature = async ({ body, signature, signatureKey, notificationUrl }) => {
+  if (typeof WebhooksHelper?.verifySignature === 'function') {
+    return WebhooksHelper.verifySignature({ requestBody: body, signatureHeader: signature, signatureKey, notificationUrl });
+  }
+  if (typeof WebhooksHelper?.isValidWebhookEventSignature === 'function') {
+    return WebhooksHelper.isValidWebhookEventSignature(body, signature, signatureKey, notificationUrl);
+  }
+  throw new Error('Square Webhook署名検証機能を利用できません。');
+};
+
+const sendGaConfirmation = async ({ clientId, value, requestId }) => {
+  const measurementId = process.env.GA_MEASUREMENT_ID || 'G-K26L6NB3MK';
+  const apiSecret = process.env.GA_MEASUREMENT_PROTOCOL_API_SECRET;
+  if (!apiSecret || !clientId) return;
+  const response = await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(measurementId)}&api_secret=${encodeURIComponent(apiSecret)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: clientId,
+      events: [{ name: 'booking_confirmed', params: { currency: 'JPY', value, transaction_id: requestId } }],
+    }),
+  });
+  if (!response.ok) throw new Error(`GA Measurement Protocol: ${response.status}`);
+};
 
 exports.handler = async (event) => {
-  // POSTメソッド以外は拒否
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+  if (event.httpMethod !== 'POST') return text(405, 'Method Not Allowed');
+
+  const signatureKey = process.env.SQUARE_WEBHOOK_SIGNATURE_KEY;
+  const notificationUrl = process.env.SQUARE_WEBHOOK_NOTIFICATION_URL;
+  const signature = event.headers['x-square-hmacsha256-signature'] || event.headers['X-Square-Hmacsha256-Signature'];
+  if (!signatureKey || !notificationUrl || !signature) {
+    console.error('Square webhook verification settings are missing.');
+    return text(503, 'Webhook verification is not configured');
   }
 
-  // 1. 署名検証（Squareからの正当なリクエストか確認）
-  const signature = event.headers['x-square-hmacsha256-signature'];
-  const body = event.body;
-  // NetlifyのURL（本番環境のURLを設定する必要があります）
-  // ※今回は署名検証ロジックを簡易化またはスキップするか、厳密に行うか検討が必要ですが
-  // 一旦、ログ出力に留めて処理を進める形にします（本番運用時は厳密な検証推奨）
-  
   try {
-    const data = JSON.parse(body);
+    const valid = await verifySignature({ body: event.body, signature, signatureKey, notificationUrl });
+    if (!valid) return text(403, 'Invalid signature');
 
-    // 2. イベントタイプの確認
-    // payment.updated または order.updated などを受け取る
-    if (data.type === 'payment.updated') {
-      const payment = data.data.object.payment;
-      
-      // 支払いが完了(COMPLETED)しているか
-      if (payment.status === 'COMPLETED') {
-        
-        // 3. 予約ID（GoogleカレンダーのEventID）を取り出す
-        // createCheckout.js で paymentNote に入れたIDを探す、または metadata を使う
-        // ※SquareのPaymentオブジェクトからNoteは直接取れない場合があるので、
-        // 実際はOrder IDから詳細を引く必要がありますが、
-        // ここでは「カレンダー側を検索する」アプローチをとります（より確実）
-        
-        // Googleカレンダー認証
-        const jwtClient = new google.auth.JWT(
-          GOOGLE_CLIENT_EMAIL,
-          null,
-          GOOGLE_PRIVATE_KEY,
-          ['https://www.googleapis.com/auth/calendar']
-        );
-        await jwtClient.authorize();
-        const calendar = google.calendar({ version: 'v3', auth: jwtClient });
+    const payload = JSON.parse(event.body || '{}');
+    if (payload.type !== 'invoice.payment_made') return text(200, 'Ignored');
+    const invoice = payload.data?.object?.invoice;
+    const invoiceId = invoice?.id;
+    if (!invoiceId) return text(400, 'Invoice ID is missing');
 
-        // 直近の「HOLD」イベントを検索する簡易ロジック
-        // 本来はOrder IDなどをメタデータに入れて照合するのがベストですが、
-        // 今回は「仮押さえ」のタイトル "HOLD" を "RESERVED" に変える運用でカバーします。
-        
-        // ※正確には、SquareのCheckout IDなどをキーにするのが堅牢です。
-        // 今回は実装の複雑さを避けるため、Squareからの通知を受け取ったら
-        // オーナーに「支払い完了通知メール」を送る機能に倒すのも手ですが、
-        // ここでは「カレンダー更新」を目指します。
-        
-        // （Webhookの実装はデバッグが難しいため、まずは「決済完了画面」で
-        // ユーザーに「予約確定しました」と表示し、
-        // オーナーが手動でカレンダーを「確定」にする運用から始めるのが安全かもしれません。
-        // しかし、自動化のご希望に沿って、ここでは簡易的な実装コードを置いておきます）
-        
-        console.log("Payment Completed:", payment.id);
-        
-        // 実際にはここでカレンダーの特定イベントを更新する処理が入ります。
-        // 今回は複雑さを回避するため、コンソールログ出力のみとし、
-        // メール通知機能（Netlifyの標準機能など）でオーナーに知らせる形を推奨します。
-      }
+    const calendar = await calendarClient();
+    const calendarId = process.env.CAL_DIRECT_ID;
+    const found = await calendar.events.list({
+      calendarId,
+      privateExtendedProperty: [`invoiceId=${invoiceId}`],
+      showDeleted: false,
+      maxResults: 1,
+    });
+    const bookingEvent = found.data.items?.[0];
+    if (!bookingEvent) {
+      console.error(`No calendar event for invoice ${invoiceId}`);
+      return text(200, 'No matching booking');
     }
 
-    return { statusCode: 200, body: 'OK' };
+    const privateProperties = bookingEvent.extendedProperties?.private || {};
+    if (privateProperties.paymentConfirmedAt) return text(200, 'Already confirmed');
+    const confirmedAt = new Date().toISOString();
+    await calendar.events.patch({
+      calendarId,
+      eventId: bookingEvent.id,
+      requestBody: {
+        summary: String(bookingEvent.summary || '').replace(/^\[未決済・Direct\]/, '[確定・Direct]'),
+        description: String(bookingEvent.description || '').replace('公式サイトからの予約リクエスト（未決済）', '公式サイト予約（支払い済み・予約確定）'),
+        colorId: '10',
+        extendedProperties: { private: { ...privateProperties, paymentConfirmedAt: confirmedAt } },
+      },
+    });
 
+    await sendGaConfirmation({
+      clientId: privateProperties.gaClientId,
+      value: Number(privateProperties.totalPrice || 0),
+      requestId: privateProperties.requestId || invoiceId,
+    }).catch((error) => console.error('GA confirmation event failed:', error));
+    return text(200, 'Confirmed');
   } catch (error) {
-    console.error("Webhook Error:", error);
-    return { statusCode: 500, body: 'Error' };
+    console.error('Square Webhook Error:', error);
+    return text(500, 'Error');
   }
 };

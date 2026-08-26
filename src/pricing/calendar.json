@@ -2,9 +2,10 @@
   "_meta": {
     "source": "Terra 料金テーブル v1.0 / 日付別カレンダー",
     "spreadsheetId": "17YZGWOwfz2XWc5a1_lBin9Ka7L8gUq00_qF9JJJq47Y",
+    "sheetId": 656328032,
     "rangeStart": "2026-07-01",
     "rangeEnd": "2027-03-31",
-    "generatedFrom": "snapshot"
+    "rowCount": 274
   },
   "rates": {
     "2026-07-01": {
