@@ -347,8 +347,7 @@ function Booking({ onOpenPrivacy }) {
             <button className="button button--primary button--wide" type="submit" disabled={result.status === 'checking'}>{result.status === 'checking' ? '確認しています…' : '空室と料金を確認'}</button>
           </form>
 
-          <div className="booking-result" aria-live="polite">
-            {result.status === 'idle' && <p className="booking-placeholder">選択した日程の空室と、清掃費・サービス料を含む宿泊総額を表示します。</p>}
+          {result.status !== 'idle' && <div className="booking-result" aria-live="polite">
             {result.status === 'invalid' && <div className="notice notice--error"><strong>入力内容をご確認ください</strong><p>{result.message}</p></div>}
             {result.status === 'unavailable' && <div className="notice notice--error"><strong>この日程は満室です</strong><p>別の日程を選んで、もう一度空室をご確認ください。</p><button type="button" className="button button--ghost" onClick={() => setResult({ status: 'idle' })}>別の日程を探す</button></div>}
             {result.status === 'error' && <div className="notice notice--error"><strong>空室情報を取得できませんでした</strong><p>時間をおいて、もう一度お試しください。</p><div className="button-row"><button type="button" className="button button--ghost" onClick={() => setResult({ status: 'idle' })}>もう一度試す</button>{OTA_LINKS.map((link) => <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" onClick={() => track('click_ota', { ota: link.label })}>{link.label}</a>)}</div></div>}
@@ -404,7 +403,7 @@ function Booking({ onOpenPrivacy }) {
               </form>
             )}
             {result.status === 'consultation_success' && <div className="notice notice--success success-panel"><strong>ご相談を受け付けました</strong><p>24時間以内にメールでご連絡します。</p></div>}
-          </div>
+          </div>}
         </div>
       </div>
     </section>

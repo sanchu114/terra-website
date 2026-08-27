@@ -109,7 +109,6 @@ textarea { min-height: 108px; resize: vertical; }
 input:focus, select:focus, textarea:focus { border-color: var(--forest); outline: 2px solid rgba(74,93,35,.15); }
 .booking-summary { margin: 18px 0; display: flex; justify-content: space-between; color: var(--muted); font-size: .86rem; }
 .booking-summary .is-error { color: var(--danger); font-weight: 700; }
-.booking-placeholder { max-width: 390px; margin: 0; color: var(--muted); }
 .notice { padding: 20px 22px; border-left: 3px solid; }
 .notice strong { display: block; margin-bottom: 6px; font-size: 1.05rem; }
 .notice p { margin: 0 0 13px; }
