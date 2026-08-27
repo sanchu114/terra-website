@@ -60,11 +60,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .hero__pagination button { width: 32px; height: 32px; padding: 0; border: 0; display: grid; place-items: center; background: transparent; cursor: pointer; }
 .hero__pagination button::before { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.55); content: ""; transition: background .2s ease, transform .2s ease; }
 .hero__pagination button.is-active::before { background: #fff; transform: scale(1.45); }
-.facts { width: var(--container); margin: 28px auto 0; padding: 0; display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); border-block: 1px solid var(--line); }
-.fact { min-height: 58px; padding: 14px 18px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--line); }
-.fact:last-child { border-right: 0; }
-.fact strong { font-size: 1.2rem; font-weight: 600; }
-
 .concept-note { padding: 48px 0 52px; border-bottom: 1px solid var(--line); }
 .concept-note__inner { max-width: none; }
 .concept-note p { margin: 0; color: var(--muted); }
@@ -254,10 +249,7 @@ footer { padding: 54px 0 110px; border-top: 1px solid var(--line); }
 .gallery-dialog__footer { border-top: 1px solid rgba(255,255,255,.16); color: rgba(255,255,255,.72); font-size: .82rem; }
 
 @media (max-width: 980px) {
-  .facts { grid-template-columns: repeat(4,minmax(0,1fr)); }
   .concept-note p:last-child { white-space: normal; }
-  .fact:nth-child(4) { border-right: 0; }
-  .fact:nth-child(-n+4) { border-bottom: 1px solid var(--line); }
   .price-layout, .access-layout { grid-template-columns: 1fr; }
   .price-layout { row-gap: 0; }
   .room-facts, .flow { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -276,11 +268,6 @@ footer { padding: 54px 0 110px; border-top: 1px solid var(--line); }
 }
 
 @media (max-width: 680px) {
-  .facts { width: 100%; margin-top: 14px; grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .fact { min-height: 52px; padding: 10px 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .fact:nth-child(even) { border-right: 0; }
-  .fact:nth-last-child(-n+2) { border-bottom: 0; }
-  .fact:last-child { grid-column: 1 / -1; border-right: 0; border-top: 1px solid var(--line); }
   .section { padding: 68px 0; }
   .section__head { margin-bottom: 28px; }
   .faq-list { grid-template-columns: 1fr; }

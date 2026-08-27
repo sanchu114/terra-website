@@ -13,6 +13,7 @@ test('主要コンテンツと予約導線を描画する', () => {
   expect(html).toContain('個人情報の取り扱い');
   expect(html).not.toContain('OFFICIAL BOOKING');
   expect(html).not.toContain('THE HOUSE');
+  expect(html).not.toContain('aria-label="施設の主要情報"');
   expect(html).toContain('/assets/photos/hero1.jpg');
   expect(html).toContain('/assets/photos/renewal/entrance.jpg');
   expect(html).toContain('/assets/photos/renewal/kitchen-dining.jpg');

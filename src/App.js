@@ -449,16 +449,6 @@ function App() {
           </div>
         </section>
 
-        <section className="facts" aria-label="施設の主要情報">
-          <div className="fact"><strong>一棟貸し</strong></div>
-          <div className="fact"><strong>4寝室</strong></div>
-          <div className="fact"><strong>最大8名</strong></div>
-          <div className="fact"><strong>キッチン</strong></div>
-          <div className="fact"><strong>洗濯機</strong></div>
-          <div className="fact"><strong>光回線</strong></div>
-          <div className="fact"><strong>駐車1台</strong></div>
-        </section>
-
         <section id="concept" className="concept-note container" aria-label="Terraについて">
           <div className="concept-note__inner">
             <p className="concept-note__lead">Terra（テラ）は、ラテン語で「大地」を意味します。</p>
