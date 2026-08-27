@@ -22,6 +22,12 @@ test('主要コンテンツと予約導線を描画する', () => {
   expect(html).not.toContain('洗剤・物干し用品あり');
   expect(html).toContain('しまなみ海道・伯方島の山間にある');
   expect(html).toContain('ラテン語で「大地」');
+  expect(html).toContain('大地に還る時間。');
+  expect(html).toContain('/assets/photos/niwa.png');
+  expect(html).toContain('Terra 空室カレンダー');
+  expect(html).toContain('コンビニは車で約7分');
+  expect(html).toContain('ハイチェアは事前連絡要');
+  expect(html).not.toContain('ベビーベッド');
   expect(html).toContain('PC作業に使えるデスク、ダイニングテーブル');
   expect(html).toContain('電子タバコを含め全面禁煙');
   expect(html).toContain('周辺の買い物');
