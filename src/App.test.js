@@ -7,7 +7,12 @@ test('主要コンテンツと予約導線を描画する', () => {
   expect(html).toContain('暮らすように、泊まる。');
   expect(html).toContain('空室と料金を確認');
   expect(html).toContain('設備・アメニティ');
+  expect(html).toContain('お部屋と間取り');
+  expect(html).toContain('約144㎡の2階建て。寝室4室、セミダブルベッド2台、敷布団6組です。');
+  expect(html).toContain('予約確定までの流れ');
   expect(html).toContain('個人情報の取り扱い');
+  expect(html).not.toContain('OFFICIAL BOOKING');
+  expect(html).not.toContain('THE HOUSE');
   expect(html).toContain('/assets/photos/hero1.jpg');
   expect(html).toContain('/assets/photos/renewal/entrance.jpg');
   expect(html).toContain('/assets/photos/renewal/kitchen-dining.jpg');
