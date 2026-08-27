@@ -450,13 +450,13 @@ function App() {
         </section>
 
         <section className="facts" aria-label="施設の主要情報">
-          <div className="fact"><strong>一棟貸し</strong><span>約144㎡・2階建て</span></div>
-          <div className="fact"><strong>4寝室</strong><span>1階2室・2階2室</span></div>
-          <div className="fact"><strong>最大8名</strong><span>未就学児を含む総定員</span></div>
-          <div className="fact"><strong>キッチン</strong><span>2口IH・調理器具</span></div>
-          <div className="fact"><strong>洗濯機</strong><span>洗剤・物干し用品あり</span></div>
-          <div className="fact"><strong>光回線</strong><span>無料Wi-Fi</span></div>
-          <div className="fact"><strong>駐車1台</strong><span>2台目以降は要相談</span></div>
+          <div className="fact"><strong>一棟貸し</strong></div>
+          <div className="fact"><strong>4寝室</strong></div>
+          <div className="fact"><strong>最大8名</strong></div>
+          <div className="fact"><strong>キッチン</strong></div>
+          <div className="fact"><strong>洗濯機</strong></div>
+          <div className="fact"><strong>光回線</strong></div>
+          <div className="fact"><strong>駐車1台</strong></div>
         </section>
 
         <section id="concept" className="concept-note container" aria-label="Terraについて">
