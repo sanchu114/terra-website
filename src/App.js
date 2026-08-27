@@ -406,7 +406,7 @@ function App() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     const intervalId = window.setInterval(() => {
       setHeroIndex((current) => (current + 1) % HERO_IMAGES.length);
-    }, 8000);
+    }, 2000);
     return () => window.clearInterval(intervalId);
   }, []);
 
@@ -434,7 +434,7 @@ function App() {
             />
           ))}
           <div className="hero__shade" />
-          <div className="hero__copy"><h1 id="hero-title">暮らすように、泊まる。</h1><p className="hero__lead">しまなみ海道・伯方島にある、1日1組限定の一棟貸し。<br />キッチン、洗濯機、光回線Wi-Fiを備え、最大8名まで宿泊できます。</p><div className="hero__actions"><a className="button button--primary" href="#booking">空室と料金を確認</a><a className="button button--light" href="#rooms">写真・間取りを見る</a></div></div>
+          <div className="hero__copy"><h1 id="hero-title">暮らすように、泊まる。</h1><p className="hero__lead">しまなみ海道・伯方島の山間にある、1日1組限定の一棟貸し。<br />キッチン、洗濯機、光回線Wi-Fiを備え、最大8名まで宿泊できます。</p><div className="hero__actions"><a className="button button--primary" href="#booking">空室と料金を確認</a><a className="button button--light" href="#rooms">写真・間取りを見る</a></div></div>
           <div className="hero__pagination" aria-label="ヒーロー写真を選ぶ">
             {HERO_IMAGES.map((image, index) => (
               <button
@@ -459,6 +459,13 @@ function App() {
           <div className="fact"><strong>駐車1台</strong><span>2台目以降は要相談</span></div>
         </section>
 
+        <section id="concept" className="concept-note container" aria-label="Terraについて">
+          <div className="concept-note__inner">
+            <p className="concept-note__lead">Terra（テラ）は、ラテン語で「大地」を意味します。</p>
+            <p>広い縁側で過ごしたり、風や鳥の声を聞いたり。目の前の里山を眺めながら、何もしない時間も過ごせる宿です。</p>
+          </div>
+        </section>
+
         <Booking onOpenPrivacy={() => setPrivacyOpen(true)} />
 
         <section id="rooms" className="section section--tight container" aria-labelledby="rooms-title">
@@ -476,18 +483,18 @@ function App() {
         <section className="section container" aria-labelledby="amenity-title"><div className="section__head"><h2 id="amenity-title">設備・アメニティ</h2></div><div className="details-list">
           <details open><summary>キッチン・食事</summary><div><ul><li>2口IH、冷蔵・冷凍庫、電子レンジ、電気ケトル、炊飯器</li><li>基本的な調理器具、食器・カトラリー、食器用洗剤</li></ul></div></details>
           <details><summary>浴室・洗面</summary><div><ul><li>シャンプー、コンディショナー、ボディソープ、洗顔料</li><li>ハンドソープ、ドライヤー、歯ブラシ、カミソリ</li><li>バスタオル・フェイスタオル</li><li>くし・ブラシ、シャワーキャップ、パジャマはありません</li></ul></div></details>
-          <details><summary>洗濯・長期滞在</summary><div><ul><li>洗濯機、洗濯洗剤、ハンガー・物干し用品</li><li>乾燥機はありません</li><li>無料の光回線Wi-Fi</li></ul></div></details>
+          <details><summary>洗濯・長期滞在</summary><div><ul><li>洗濯機、洗濯洗剤、ハンガー・物干し用品</li><li>乾燥機はありません</li><li>無料の光回線Wi-Fi</li><li>PC作業に使えるデスク、ダイニングテーブル</li></ul></div></details>
           <details><summary>空調・共用設備</summary><div><ul><li>エアコン（3部屋）</li><li>テレビ、ボードゲーム</li></ul></div></details>
           <details><summary>子ども向け</summary><div><ul><li>ベビーベッド・ハイチェアは事前連絡要</li><li>未就学児は添い寝無料、寝具利用は1名1泊2,500円</li><li>子ども用食器はありません</li></ul></div></details>
         </div></section>
 
         <section id="food" className="section container" aria-labelledby="food-title"><div className="section__head"><h2 id="food-title">お食事</h2><p>朝食と夕食は、近隣の山中商店へ事前注文できます。</p></div><div className="food-feature"><div className="food-feature__photos"><figure><img src="/assets/photos/renewal/pantry-dinner.jpg" alt="揚げ物やいなり寿司などを盛り付けた3名分の夕食" /><figcaption>夕食の提供例（3名分）</figcaption></figure></div><div className="food-feature__content"><h3>山中商店の朝食・夕食</h3><p className="food-feature__lead">1名分からご注文いただけます。</p><ul className="food-feature__prices"><li><span>夕食</span><strong>1,300円／人</strong></li><li><span>朝食</span><strong>900円／人</strong></li><li><span>1泊セット（夕食＋朝食）</span><strong>2,000円／人</strong></li></ul><p className="food-feature__label">ご予約とお支払い</p><ul className="food-feature__terms"><li>前日17:00までに要予約</li><li>チェックイン時に山中商店で現金払い</li><li>ご注文確定後の当日キャンセルは、料金の全額を申し受けます</li></ul><p className="food-feature__note">内容・品数・器は、当日の仕入れ状況により変わります。<br />アレルギーがある場合は予約時にお知らせください。</p></div></div></section>
 
-        <section id="price" className="section container" aria-labelledby="price-title"><div className="section__head section__head--wide"><h2 id="price-title">料金・キャンセル規定</h2><p>日程ごとの宿泊総額は、ページ上部の空室・料金確認で表示します。</p></div><div className="price-layout"><div><div className="table-card"><h3>1〜2名の基本料金（1泊）</h3><div className="table-scroll"><table><thead><tr><th>シーズン</th><th>日〜木</th><th>金</th><th>土・祝前日</th></tr></thead><tbody><tr><td>オフ</td><td>12,000円</td><td>14,000円</td><td>17,000円</td></tr><tr><td>ミドル</td><td>15,000円</td><td>17,000円</td><td>22,000円</td></tr><tr><td>ピーク</td><td>18,000円</td><td>20,000円</td><td>25,000円</td></tr><tr><td>スーパーピーク</td><td className="rate-all-days" colSpan="3">曜日を問わず 24,000円</td></tr></tbody></table></div><ul className="price-note-list"><li>3名目以降：1名1泊5,000円</li><li>未就学児：添い寝無料、寝具利用は1名1泊2,500円</li><li>最大宿泊人数は、未就学児も含めて8人です</li><li>6〜29泊：宿泊総額から15%引き。30泊以上は個別見積もり</li><li>連泊中の清掃はありません</li><li>清掃費・サービス料込み、税込</li></ul></div><div className="table-card cancellation"><h3>キャンセル料</h3><div className="table-scroll"><table><thead><tr><th>キャンセルのご連絡</th><th>キャンセル料</th></tr></thead><tbody><tr><td>チェックイン日の7日前23:59まで</td><td>無料</td></tr><tr><td>6〜2日前</td><td>30%</td></tr><tr><td>前日</td><td>50%</td></tr><tr><td>当日・無連絡不泊</td><td>100%</td></tr></tbody></table></div></div></div><aside className="policy-card"><div className="policy-item"><strong>予約の成立</strong><span>お支払い完了をもって確定します。</span></div><div className="policy-item"><strong>空室確認</strong><span>予約リクエスト後、24時間以内にご案内します。</span></div><div className="policy-item"><strong>お支払い期限</strong><span>請求書のご案内から原則48時間以内です。</span></div><div className="policy-item"><strong>静粛時間・禁煙</strong><span>20:00以降は静かにお過ごしください。室内全面禁煙です。</span></div><div className="policy-item"><strong>返金</strong><span>キャンセル料を差し引き、お支払い時と同じ方法へ返金します。返金処理はキャンセル確定後7営業日以内です。</span></div></aside></div></section>
+        <section id="price" className="section container" aria-labelledby="price-title"><div className="section__head section__head--wide"><h2 id="price-title">料金・キャンセル規定</h2><p>日程ごとの宿泊総額は、ページ上部の空室・料金確認で表示します。</p></div><div className="price-layout"><div><div className="table-card"><h3>1〜2名の基本料金（1泊）</h3><div className="table-scroll"><table><thead><tr><th>シーズン</th><th>日〜木</th><th>金</th><th>土・祝前日</th></tr></thead><tbody><tr><td>オフ</td><td>12,000円</td><td>14,000円</td><td>17,000円</td></tr><tr><td>ミドル</td><td>15,000円</td><td>17,000円</td><td>22,000円</td></tr><tr><td>ピーク</td><td>18,000円</td><td>20,000円</td><td>25,000円</td></tr><tr><td>スーパーピーク</td><td className="rate-all-days" colSpan="3">曜日を問わず 24,000円</td></tr></tbody></table></div><ul className="price-note-list"><li>3名目以降：1名1泊5,000円</li><li>未就学児：添い寝無料、寝具利用は1名1泊2,500円</li><li>最大宿泊人数は、未就学児も含めて8人です</li><li>6〜29泊：宿泊総額から15%引き。30泊以上は個別見積もり</li><li>連泊中の清掃はありません</li><li>清掃費・サービス料込み、税込</li></ul></div><div className="table-card cancellation"><h3>キャンセル料</h3><div className="table-scroll"><table><thead><tr><th>キャンセルのご連絡</th><th>キャンセル料</th></tr></thead><tbody><tr><td>チェックイン日の7日前23:59まで</td><td>無料</td></tr><tr><td>6〜2日前</td><td>30%</td></tr><tr><td>前日</td><td>50%</td></tr><tr><td>当日・無連絡不泊</td><td>100%</td></tr></tbody></table></div></div></div><aside className="policy-card"><div className="policy-item"><strong>予約の成立</strong><span>お支払い完了をもって確定します。</span></div><div className="policy-item"><strong>空室確認</strong><span>予約リクエスト後、24時間以内にご案内します。</span></div><div className="policy-item"><strong>お支払い期限</strong><span>請求書のご案内から原則48時間以内です。</span></div><div className="policy-item"><strong>静粛時間・禁煙</strong><span>20:00以降は静かにお過ごしください。室内は電子タバコを含め全面禁煙です。喫煙は屋外の指定場所をご利用ください。</span></div><div className="policy-item"><strong>返金</strong><span>キャンセル料を差し引き、お支払い時と同じ方法へ返金します。返金処理はキャンセル確定後7営業日以内です。</span></div></aside></div></section>
 
         <section className="section container" aria-labelledby="flow-title"><div className="section__head"><h2 id="flow-title">予約確定までの流れ</h2><p>予約リクエストの送信後、空室を最終確認します。お支払い完了をもって予約確定です。</p></div><div className="flow">{[['01','空室・料金確認','日程と人数だけで、空室と税込総額を確認します。'],['02','予約リクエスト','連絡先と食事・BBQなどの希望を送ります。'],['03','お支払いのご案内','空室を最終確認し、24時間以内にお支払い方法をご案内します。'],['04','お支払い・予約確定','お支払い完了後、予約確定をご連絡します。']].map(([n,h,p]) => <article className="flow-step" key={n}><b>{n}</b><h3>{h}</h3><p>{p}</p></article>)}</div></section>
 
-        <section id="access" className="section container" aria-labelledby="access-title"><div className="section__head"><h2 id="access-title">アクセス</h2><p>伯方島ICから車で約10分。島内の移動は車または自転車が便利です。</p></div><div className="access-layout"><div className="access-map"><iframe title="Terra -Shimanami- 周辺地図" src="https://www.google.com/maps?q=Terra%20-Shimanami-%20%E6%84%9B%E5%AA%9B%E7%9C%8C%E4%BB%8A%E6%B2%BB%E5%B8%82%E4%BC%AF%E6%96%B9%E7%94%BA%E5%8C%97%E6%B5%A6%E7%94%B21501-3&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><div className="access-map__meta"><address><strong>Terra -Shimanami-</strong><span>愛媛県今治市伯方町北浦甲1501-3</span></address><a href="https://maps.app.goo.gl/dcowbr5HjqgSd6Qf6" target="_blank" rel="noopener noreferrer">Googleマップで開く</a></div></div><div className="access-list"><div><strong>車でお越しの方</strong><span>しまなみ海道・伯方島ICから約10分です。</span></div><div><strong>駐車場</strong><span>1台・要予約。2台目は事前にご連絡ください。</span></div><div><strong>自転車でお越しの方</strong><span>敷地内に駐輪できます。</span></div><p>チェックイン方法と詳しい道順は、予約確定後にご案内します。</p></div></div></section>
+        <section id="access" className="section container" aria-labelledby="access-title"><div className="section__head"><h2 id="access-title">アクセス</h2><p>伯方島ICから車で約10分。島内の移動は車または自転車が便利です。</p></div><div className="access-layout"><div className="access-map"><iframe title="Terra -Shimanami- 周辺地図" src="https://www.google.com/maps?q=Terra%20-Shimanami-%20%E6%84%9B%E5%AA%9B%E7%9C%8C%E4%BB%8A%E6%B2%BB%E5%B8%82%E4%BC%AF%E6%96%B9%E7%94%BA%E5%8C%97%E6%B5%A6%E7%94%B21501-3&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><div className="access-map__meta"><address><strong>Terra -Shimanami-</strong><span>愛媛県今治市伯方町北浦甲1501-3</span></address><a href="https://maps.app.goo.gl/dcowbr5HjqgSd6Qf6" target="_blank" rel="noopener noreferrer">Googleマップで開く</a></div></div><div className="access-list"><div><strong>車でお越しの方</strong><span>しまなみ海道・伯方島ICから約10分です。</span></div><div><strong>駐車場</strong><span>1台・要予約。2台目は事前にご連絡ください。</span></div><div><strong>自転車でお越しの方</strong><span>敷地内に駐輪できます。</span></div><div><strong>周辺の買い物</strong><span>山中商店は徒歩圏内です。コンビニは車で約5分、道の駅「マリンオアシスはかた」は車で約10分です。</span></div><div><strong>周辺のお食事</strong><span>近隣に飲食店や大型スーパーはありません。食材の購入や食事の事前注文は、宿泊前にご確認ください。</span></div><p>チェックイン方法と詳しい道順は、予約確定後にご案内します。</p></div></div></section>
 
         <section className="section container" aria-labelledby="faq-title"><div className="section__head"><h2 id="faq-title">よくあるご質問</h2></div><div className="faq-list">
           <details><summary>予約リクエストと予約確定の違いは？</summary><div>リクエスト後に空室を最終確認し、お支払い方法をご案内します。お支払い完了をもって予約確定です。</div></details>
@@ -498,12 +505,13 @@ function App() {
           <details><summary>洗濯機と乾燥機はありますか？</summary><div>洗濯機、洗剤、物干し用品があります。乾燥機はありません。</div></details>
           <details><summary>20:00以降のルールは？</summary><div>20:00以降は静かにお過ごしください。</div></details>
           <details><summary>ベビーベッドはありますか？</summary><div>ベビーベッドとハイチェアは、事前にご連絡いただければご用意可能です。</div></details>
+          <details><summary>虫は出ますか？</summary><div>自然に囲まれた山間の立地のため、季節によって室内に虫が入ることがあります。</div></details>
         </div></section>
 
         <section className="closing"><div><h2>空室と料金を確認</h2><p>お名前を入力する前に、空室と宿泊総額が分かります。</p></div><a className="button button--light" href="#booking">空室と料金を確認</a></section>
       </main>
 
-      <footer><div className="footer-inner"><div className="footer-brand"><img src="/logo.png" alt="Terra -Shimanami-" /><p>愛媛県今治市・伯方島にある、1日1組限定の一棟貸し。約144㎡・4寝室・最大8名。</p></div><nav className="footer-links"><a href="#price">料金・利用条件</a><a href="#price">キャンセル規定</a><a href="#access">アクセス</a><a href="#booking">予約リクエスト</a><a href="#privacy-dialog" onClick={(event) => { event.preventDefault(); setPrivacyOpen(true); }}>個人情報の取り扱い</a></nav></div></footer>
+      <footer><div className="footer-inner"><div className="footer-brand"><img src="/logo.png" alt="Terra -Shimanami-" /><p>愛媛県今治市・伯方島の山間にある、1日1組限定の一棟貸し古民家宿。約144㎡・4寝室・最大8名。</p></div><nav className="footer-links"><a href="#price">料金・利用条件</a><a href="#price">キャンセル規定</a><a href="#access">アクセス</a><a href="#booking">予約リクエスト</a><a href="#privacy-dialog" onClick={(event) => { event.preventDefault(); setPrivacyOpen(true); }}>個人情報の取り扱い</a></nav></div></footer>
       <div className="mobile-cta"><a className="button button--primary" href="#booking">空室と料金を確認</a></div>
       {galleryIndex !== null && <Gallery initialIndex={galleryIndex} onClose={() => setGalleryIndex(null)} />}
       {privacyOpen && <PrivacyDialog onClose={() => setPrivacyOpen(false)} />}

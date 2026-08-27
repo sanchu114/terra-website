@@ -19,6 +19,12 @@ test('主要コンテンツと予約導線を描画する', () => {
   expect(html).toContain('/assets/photos/renewal/engawa.jpg');
   expect(html).toContain('未就学児を含む総定員');
   expect(html).toContain('洗剤・物干し用品あり');
+  expect(html).toContain('しまなみ海道・伯方島の山間にある');
+  expect(html).toContain('ラテン語で「大地」');
+  expect(html).toContain('PC作業に使えるデスク、ダイニングテーブル');
+  expect(html).toContain('電子タバコを含め全面禁煙');
+  expect(html).toContain('周辺の買い物');
+  expect(html).toContain('虫は出ますか？');
 });
 
 test('チェックイン選択後にチェックアウトへ移る', () => {
