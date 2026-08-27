@@ -3,12 +3,12 @@ import { calcStay } from './pricing/pricing';
 import { getGaClientId, track } from './analytics';
 
 const PHOTOS = [
+  { src: '/assets/photos/renewal/engawa.jpg', alt: '午後の光が差し込む1階の縁側と籐の座卓', caption: '1階の縁側' },
   { src: '/assets/photos/renewal/floor-plan.jpeg', alt: 'Terraの1階と2階の間取り図', caption: '1階・2階の間取り' },
   { src: '/assets/photos/renewal/tv-room.jpeg', alt: '座卓とテレビのある1階和室', caption: '1階和室' },
-  { src: '/assets/photos/renewal/engawa.jpg', alt: '午後の光が差し込む1階の縁側と籐の座卓', caption: '1階の縁側' },
-  { src: '/assets/photos/renewal/kitchen-dining.jpg', alt: '青いタイルのキッチンと丸いダイニングテーブル', caption: 'ダイニングキッチン' },
   { src: '/assets/photos/renewal/bedroom.png', alt: 'セミダブルベッドが2台ある2階ベッドルーム', caption: '2階ベッドルーム' },
   { src: '/assets/photos/renewal/futon-room.jpg', alt: '敷布団を用意した畳敷きの和室', caption: '和室・敷布団' },
+  { src: '/assets/photos/renewal/kitchen-dining.jpg', alt: '青いタイルのキッチンと丸いダイニングテーブル', caption: 'ダイニングキッチン' },
   { src: '/assets/photos/renewal/entrance.jpg', alt: 'Terraの玄関', caption: '玄関' },
   { src: '/assets/photos/renewal/bathroom.jpeg', alt: '浴槽と洗い場の全体が見える浴室', caption: '浴室' },
   { src: '/assets/photos/renewal/toilet.jpg', alt: '1階のトイレ', caption: 'トイレ' },
@@ -123,7 +123,7 @@ function PrivacyDialog({ onClose }) {
           <div className="privacy-dialog__body">
             <p className="privacy-dialog__lead">Terraは、予約、宿泊および当ウェブサイトの運営にあたり取得する個人情報を、以下のとおり取り扱います。</p>
             <section className="privacy-dialog__section"><h3>1. 事業者情報</h3><p>事業者名：Terra<br />運営責任者：山中志保<br />施設所在地：愛媛県今治市伯方町北浦甲1501-3<br />お問い合わせ先：<a href="mailto:info@terra-shimanami.com">info@terra-shimanami.com</a></p></section>
-            <section className="privacy-dialog__section"><h3>2. 取得する情報</h3><ul><li>氏名、メールアドレス、電話番号</li><li>宿泊日、宿泊人数、到着予定時刻、予約および宿泊に関するご希望</li><li>食事、BBQ、ペット同伴、ベビーベッド等の手配に必要な情報</li><li>予約、支払い、キャンセル、返金の状況</li><li>法令で求められる宿泊者名簿の情報</li><li>Cookie、IPアドレス、端末・ブラウザ情報、閲覧ページ等の利用情報</li></ul></section>
+            <section className="privacy-dialog__section"><h3>2. 取得する情報</h3><ul><li>氏名、メールアドレス、電話番号</li><li>宿泊日、宿泊人数、到着予定時刻、予約および宿泊に関するご希望</li><li>食事、BBQ、ペット同伴、ハイチェア等の手配に必要な情報</li><li>予約、支払い、キャンセル、返金の状況</li><li>法令で求められる宿泊者名簿の情報</li><li>Cookie、IPアドレス、端末・ブラウザ情報、閲覧ページ等の利用情報</li></ul></section>
             <section className="privacy-dialog__section"><h3>3. 利用目的</h3><ul><li>空室確認、見積もり、予約受付およびお問い合わせへの回答</li><li>宿泊、食事、貸出品その他のサービス提供と連絡</li><li>代金の請求、支払い確認、キャンセルおよび返金の処理</li><li>安全確保、緊急時の連絡、不正利用や重複予約の防止</li><li>法令に基づく記録の作成と保存</li><li>ウェブサイトの利用状況の把握、予約導線の改善、障害の調査</li></ul><p>取得した連絡先を、別途同意なく広告メールやメールマガジンの配信に使用しません。</p></section>
             <section className="privacy-dialog__section"><h3>4. 外部サービスの利用</h3><p>ウェブサイトと予約業務の運営に、Netlify、Square、Google Calendar、Google Analytics、Google Mapsを利用します。各事業者には、必要な範囲で情報の処理を委託します。</p><p>決済カード情報はSquareが取り扱い、当施設のウェブサイトでは保存しません。各事業者の方針に基づき、日本国外のサーバー等で情報が処理される場合があります。</p></section>
             <section className="privacy-dialog__section"><h3>5. 第三者提供</h3><p>法令に基づく場合、人の生命・身体・財産の保護に必要な場合、または本人の同意がある場合を除き、個人情報を第三者へ提供しません。業務を委託する場合は、委託先を適切に選定・監督します。</p></section>
@@ -318,7 +318,22 @@ function Booking({ onOpenPrivacy }) {
         </div>
 
         <div className="booking-shell">
+          <section className="availability-calendar" aria-labelledby="availability-calendar-title">
+            <h3 id="availability-calendar-title">空室状況</h3>
+            <p>空室の目安としてご覧ください。最新の状況は、空室確認時と予約リクエスト送信時に再確認します。</p>
+            <div className="availability-calendar__frame">
+              <iframe
+                src="https://calendar.google.com/calendar/embed?src=34be616fad496d75975b501fedd8982239235375b20c52a8502db3f22ef6e5cb%40group.calendar.google.com&ctz=Asia%2FTokyo"
+                title="Terra 空室カレンダー"
+                loading="lazy"
+                scrolling="no"
+              />
+            </div>
+          </section>
+
           <form className="availability-form" onSubmit={checkAvailability}>
+            <h3>日程・人数</h3>
+            <p className="availability-form__intro">カレンダーを確認し、希望する日程と宿泊人数を入力してください。</p>
             <div className="booking-fields booking-fields--dates">
               <label>チェックイン<input type="date" name="checkin" min={todayKey()} value={search.checkin} onChange={setCheckinValue} required /></label>
               <label>チェックアウト<input ref={checkoutRef} type="date" name="checkout" min={search.checkin || todayKey()} value={search.checkout} onChange={setSearchValue} required /></label>
@@ -358,8 +373,8 @@ function Booking({ onOpenPrivacy }) {
                     </div>
                   </fieldset>
                   <label className="check-line"><input type="checkbox" checked={guest.bbq} onChange={(e) => setGuest({ ...guest, bbq: e.target.checked })} /><span><strong>BBQグリルセットレンタルを希望（5,000円／回）</strong><small>詳細は「よくあるご質問」からご確認ください。</small></span></label>
-                  <label>その他のご希望 <small>任意</small><textarea rows="4" value={guest.notes} onChange={(e) => setGuest({ ...guest, notes: e.target.value })} placeholder="食物アレルギー、ベビーベッド・ハイチェア、小型犬同伴など" /></label>
-                  <p className="form-help">小型犬1匹まで事前相談で同伴できます。追加料金はありません。ケージ等はご持参ください。</p>
+                  <label>その他のご希望 <small>任意</small><textarea rows="4" value={guest.notes} onChange={(e) => setGuest({ ...guest, notes: e.target.value })} placeholder="ご希望や確認事項があればご記入ください。" /></label>
+                  <p className="form-help">ハイチェアのご希望、小型犬（1匹まで・ケージ持参）の同伴はこちらにご記入ください。</p>
                   <label className="check-line check-line--terms"><input type="checkbox" checked={guest.agreed} onChange={(e) => setGuest({ ...guest, agreed: e.target.checked })} required /><span><a href="#price">料金・キャンセル規定</a>と<a href="#privacy-dialog" onClick={(event) => { event.preventDefault(); onOpenPrivacy(); }}>個人情報の取り扱い</a>を確認しました</span></label>
                   {result.status === 'request_error' && <div className="notice notice--error"><strong>送信できませんでした</strong><p>{result.message} 入力内容は保持されています。時間をおいて再度お試しください。</p></div>}
                   <button className="button button--primary button--wide" type="submit" disabled={result.status === 'submitting'}>{result.status === 'submitting' ? '送信しています…' : '予約リクエストを送信'}</button>
@@ -401,18 +416,26 @@ function App() {
   const [galleryIndex, setGalleryIndex] = useState(null);
   const [heroIndex, setHeroIndex] = useState(0);
   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     const intervalId = window.setInterval(() => {
       setHeroIndex((current) => (current + 1) % HERO_IMAGES.length);
-    }, 2000);
+    }, 5500);
     return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    const updateHeader = () => setIsScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    updateHeader();
+    return () => window.removeEventListener('scroll', updateHeader);
   }, []);
 
   return (
     <>
-      <header className="site-header">
+      <header className={`site-header${isScrolled ? ' is-scrolled' : ''}${menuOpen ? ' menu-open' : ''}`}>
         <div className="site-header__inner">
           <a className="brand" href="#top" aria-label="Terra -Shimanami- トップ"><img src="/logo.png" alt="Terra -Shimanami-" /></a>
           <nav className="desktop-nav" aria-label="メインナビゲーション"><a href="#rooms">部屋・設備</a><a href="#food">食事</a><a href="#price">料金</a><a href="#access">アクセス</a><a className="button button--primary" href="#booking">空室と料金を確認</a></nav>
@@ -434,7 +457,7 @@ function App() {
             />
           ))}
           <div className="hero__shade" />
-          <div className="hero__copy"><h1 id="hero-title">暮らすように、泊まる。</h1><p className="hero__lead">しまなみ海道・伯方島の山間にある、1日1組限定の一棟貸し。<br />キッチン、洗濯機、光回線Wi-Fiを備え、最大8名まで宿泊できます。</p><div className="hero__actions"><a className="button button--primary" href="#booking">空室と料金を確認</a><a className="button button--light" href="#rooms">写真・間取りを見る</a></div></div>
+          <div className="hero__copy"><h1 id="hero-title">暮らすように、泊まる。</h1><p className="hero__lead">しまなみ海道・伯方島の山間にある、1日1組限定の一棟貸し。<br />風や鳥の声を聞きながら、最大8名まで暮らすように過ごせます。</p><div className="hero__actions"><a className="button button--primary" href="#booking">空室と料金を確認</a><a className="hero__photo-link" href="#rooms">写真・間取りを見る</a></div></div>
           <div className="hero__pagination" aria-label="ヒーロー写真を選ぶ">
             {HERO_IMAGES.map((image, index) => (
               <button
@@ -449,10 +472,17 @@ function App() {
           </div>
         </section>
 
-        <section id="concept" className="concept-note container" aria-label="Terraについて">
+        <section id="concept" className="concept-note" aria-labelledby="concept-title">
           <div className="concept-note__inner">
-            <p className="concept-note__lead">Terra（テラ）は、ラテン語で「大地」を意味します。</p>
-            <p>広い縁側で過ごしたり、風や鳥の声を聞いたり。目の前の里山を眺めながら、何もしない時間も過ごせる宿です。</p>
+            <h2 id="concept-title"><span>大地に還る時間。</span><span>心ほどける、島の日常。</span></h2>
+            <div className="concept-note__copy">
+              <p>Terra（テラ）は、ラテン語で「大地」を意味します。</p>
+              <p>広い縁側で過ごしたり、風や鳥の声を聞いたり。目の前の里山を眺めながら、何もしない時間も過ごせる宿です。</p>
+            </div>
+            <figure className="concept-note__photo">
+              <img src="/assets/photos/niwa.png" alt="夜の庭で食事を楽しむTerraの滞在風景" />
+              <span className="concept-note__stamp" aria-hidden="true"><span>Est. 2024</span></span>
+            </figure>
           </div>
         </section>
 
@@ -462,8 +492,8 @@ function App() {
           <div className="section__head"><h2 id="rooms-title">お部屋と間取り</h2><p>約144㎡の2階建て。寝室4室、セミダブルベッド2台、敷布団6組です。</p></div>
           <div className="gallery-wrap">
             <div className="photo-gallery">
-              <button className="photo-tile photo-tile--primary photo-tile--plan" type="button" onClick={() => setGalleryIndex(0)}><img src={PHOTOS[0].src} alt={PHOTOS[0].alt} /><span>{PHOTOS[0].caption}</span></button>
-              {[1,2,3,4].map((index) => <button key={index} className="photo-tile" type="button" onClick={() => setGalleryIndex(index)}><img src={PHOTOS[index].src} alt={PHOTOS[index].alt} /><span>{PHOTOS[index].caption}</span></button>)}
+              <button className="photo-tile photo-tile--primary photo-tile--plan" type="button" onClick={() => setGalleryIndex(1)}><img src={PHOTOS[1].src} alt={PHOTOS[1].alt} /><span>{PHOTOS[1].caption}</span></button>
+              {[2,0,5,3].map((index) => <button key={index} className="photo-tile" type="button" onClick={() => setGalleryIndex(index)}><img src={PHOTOS[index].src} alt={PHOTOS[index].alt} /><span>{PHOTOS[index].caption}</span></button>)}
             </div>
             <button className="gallery-open" type="button" onClick={() => setGalleryIndex(0)}>写真をすべて見る（9枚）</button>
           </div>
@@ -475,7 +505,7 @@ function App() {
           <details><summary>浴室・洗面</summary><div><ul><li>シャンプー、コンディショナー、ボディソープ、洗顔料</li><li>ハンドソープ、ドライヤー、歯ブラシ、カミソリ</li><li>バスタオル・フェイスタオル</li><li>くし・ブラシ、シャワーキャップ、パジャマはありません</li></ul></div></details>
           <details><summary>洗濯・長期滞在</summary><div><ul><li>洗濯機、洗濯洗剤、ハンガー・物干し用品</li><li>乾燥機はありません</li><li>無料の光回線Wi-Fi</li><li>PC作業に使えるデスク、ダイニングテーブル</li></ul></div></details>
           <details><summary>空調・共用設備</summary><div><ul><li>エアコン（3部屋）</li><li>テレビ、ボードゲーム</li></ul></div></details>
-          <details><summary>子ども向け</summary><div><ul><li>ベビーベッド・ハイチェアは事前連絡要</li><li>未就学児は添い寝無料、寝具利用は1名1泊2,500円</li><li>子ども用食器はありません</li></ul></div></details>
+          <details><summary>子ども向け</summary><div><ul><li>ハイチェアは事前連絡要</li><li>未就学児は添い寝無料、寝具利用は1名1泊2,500円</li><li>子ども用食器はありません</li></ul></div></details>
         </div></section>
 
         <section id="food" className="section container" aria-labelledby="food-title"><div className="section__head"><h2 id="food-title">お食事</h2><p>朝食と夕食は、近隣の山中商店へ事前注文できます。</p></div><div className="food-feature"><div className="food-feature__photos"><figure><img src="/assets/photos/renewal/pantry-dinner.jpg" alt="揚げ物やいなり寿司などを盛り付けた3名分の夕食" /><figcaption>夕食の提供例（3名分）</figcaption></figure></div><div className="food-feature__content"><h3>山中商店の朝食・夕食</h3><p className="food-feature__lead">1名分からご注文いただけます。</p><ul className="food-feature__prices"><li><span>夕食</span><strong>1,300円／人</strong></li><li><span>朝食</span><strong>900円／人</strong></li><li><span>1泊セット（夕食＋朝食）</span><strong>2,000円／人</strong></li></ul><p className="food-feature__label">ご予約とお支払い</p><ul className="food-feature__terms"><li>前日17:00までに要予約</li><li>チェックイン時に山中商店で現金払い</li><li>ご注文確定後の当日キャンセルは、料金の全額を申し受けます</li></ul><p className="food-feature__note">内容・品数・器は、当日の仕入れ状況により変わります。<br />アレルギーがある場合は予約時にお知らせください。</p></div></div></section>
@@ -484,7 +514,7 @@ function App() {
 
         <section className="section container" aria-labelledby="flow-title"><div className="section__head"><h2 id="flow-title">予約確定までの流れ</h2><p>予約リクエストの送信後、空室を最終確認します。お支払い完了をもって予約確定です。</p></div><div className="flow">{[['01','空室・料金確認','日程と人数だけで、空室と税込総額を確認します。'],['02','予約リクエスト','連絡先と食事・BBQなどの希望を送ります。'],['03','お支払いのご案内','空室を最終確認し、24時間以内にお支払い方法をご案内します。'],['04','お支払い・予約確定','お支払い完了後、予約確定をご連絡します。']].map(([n,h,p]) => <article className="flow-step" key={n}><b>{n}</b><h3>{h}</h3><p>{p}</p></article>)}</div></section>
 
-        <section id="access" className="section container" aria-labelledby="access-title"><div className="section__head"><h2 id="access-title">アクセス</h2><p>伯方島ICから車で約10分。島内の移動は車または自転車が便利です。</p></div><div className="access-layout"><div className="access-map"><iframe title="Terra -Shimanami- 周辺地図" src="https://www.google.com/maps?q=Terra%20-Shimanami-%20%E6%84%9B%E5%AA%9B%E7%9C%8C%E4%BB%8A%E6%B2%BB%E5%B8%82%E4%BC%AF%E6%96%B9%E7%94%BA%E5%8C%97%E6%B5%A6%E7%94%B21501-3&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><div className="access-map__meta"><address><strong>Terra -Shimanami-</strong><span>愛媛県今治市伯方町北浦甲1501-3</span></address><a href="https://maps.app.goo.gl/dcowbr5HjqgSd6Qf6" target="_blank" rel="noopener noreferrer">Googleマップで開く</a></div></div><div className="access-list"><div><strong>車でお越しの方</strong><span>しまなみ海道・伯方島ICから約10分です。</span></div><div><strong>駐車場</strong><span>1台・要予約。2台目は事前にご連絡ください。</span></div><div><strong>自転車でお越しの方</strong><span>敷地内に駐輪できます。</span></div><div><strong>周辺の買い物</strong><span>山中商店は徒歩圏内です。コンビニは車で約5分、道の駅「マリンオアシスはかた」は車で約10分です。</span></div><div><strong>周辺のお食事</strong><span>近隣に飲食店や大型スーパーはありません。食材の購入や食事の事前注文は、宿泊前にご確認ください。</span></div><p>チェックイン方法と詳しい道順は、予約確定後にご案内します。</p></div></div></section>
+        <section id="access" className="section container" aria-labelledby="access-title"><div className="section__head"><h2 id="access-title">アクセス</h2><p>伯方島ICから車で約10分。島内の移動は車または自転車が便利です。</p></div><div className="access-layout"><div className="access-map"><iframe title="Terra -Shimanami- 周辺地図" src="https://www.google.com/maps?q=Terra%20-Shimanami-%20%E6%84%9B%E5%AA%9B%E7%9C%8C%E4%BB%8A%E6%B2%BB%E5%B8%82%E4%BC%AF%E6%96%B9%E7%94%BA%E5%8C%97%E6%B5%A6%E7%94%B21501-3&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><div className="access-map__meta"><address><strong>Terra -Shimanami-</strong><span>愛媛県今治市伯方町北浦甲1501-3</span></address><a href="https://maps.app.goo.gl/dcowbr5HjqgSd6Qf6" target="_blank" rel="noopener noreferrer">Googleマップで開く</a></div></div><div className="access-list"><div><strong>車でお越しの方</strong><span>しまなみ海道・伯方島ICから約10分です。</span></div><div><strong>駐車場</strong><span>1台・要予約。2台目は事前にご連絡ください。</span></div><div><strong>自転車でお越しの方</strong><span>敷地内に駐輪できます。</span></div><div><strong>周辺の買い物</strong><span>山中商店は徒歩圏内です。コンビニは車で約7分、道の駅「マリンオアシスはかた」は車で約10分です。</span></div><div><strong>周辺のお食事</strong><span>近隣に飲食店や大型スーパーはありません。食材の購入や食事の事前注文は、宿泊前にご確認ください。</span></div><p>チェックイン方法と詳しい道順は、予約確定後にご案内します。</p></div></div></section>
 
         <section className="section container" aria-labelledby="faq-title"><div className="section__head"><h2 id="faq-title">よくあるご質問</h2></div><div className="faq-list">
           <details><summary>予約リクエストと予約確定の違いは？</summary><div>リクエスト後に空室を最終確認し、お支払い方法をご案内します。お支払い完了をもって予約確定です。</div></details>
@@ -494,7 +524,6 @@ function App() {
           <details><summary>BBQはできますか？</summary><div>BBQグリルセットを1回5,000円でレンタルできます。グリル、新品の焼き網、炭用トング、食材用トング2本、火消しバケツを含みます。炭・着火剤・食材はご持参ください。持込グリル・焚火台は利用できません。調理と火気利用は20:00までです。</div></details>
           <details><summary>洗濯機と乾燥機はありますか？</summary><div>洗濯機、洗剤、物干し用品があります。乾燥機はありません。</div></details>
           <details><summary>20:00以降のルールは？</summary><div>20:00以降は静かにお過ごしください。</div></details>
-          <details><summary>ベビーベッドはありますか？</summary><div>ベビーベッドとハイチェアは、事前にご連絡いただければご用意可能です。</div></details>
           <details><summary>虫は出ますか？</summary><div>自然に囲まれた山間の立地のため、季節によって室内に虫が入ることがあります。</div></details>
         </div></section>
 
