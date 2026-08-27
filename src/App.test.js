@@ -17,8 +17,8 @@ test('主要コンテンツと予約導線を描画する', () => {
   expect(html).toContain('/assets/photos/renewal/entrance.jpg');
   expect(html).toContain('/assets/photos/renewal/kitchen-dining.jpg');
   expect(html).toContain('/assets/photos/renewal/engawa.jpg');
-  expect(html).toContain('未就学児を含む総定員');
-  expect(html).toContain('洗剤・物干し用品あり');
+  expect(html).not.toContain('未就学児を含む総定員');
+  expect(html).not.toContain('洗剤・物干し用品あり');
   expect(html).toContain('しまなみ海道・伯方島の山間にある');
   expect(html).toContain('ラテン語で「大地」');
   expect(html).toContain('PC作業に使えるデスク、ダイニングテーブル');
