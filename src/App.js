@@ -329,6 +329,7 @@ function Booking({ onOpenPrivacy }) {
                 scrolling="no"
               />
             </div>
+            <p className="availability-calendar__note">「予定あり」と表示されている日はご予約いただけません。</p>
           </section>
 
           <form className="availability-form" onSubmit={checkAvailability}>

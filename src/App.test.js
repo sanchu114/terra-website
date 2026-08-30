@@ -26,6 +26,7 @@ test('主要コンテンツと予約導線を描画する', () => {
   expect(html).toContain('大地に還る時間。');
   expect(html).toContain('/assets/photos/niwa.png');
   expect(html).toContain('Terra 空室カレンダー');
+  expect(html).toContain('「予定あり」と表示されている日はご予約いただけません。');
   expect(html).toContain('コンビニは車で約7分');
   expect(html).toContain('ハイチェアは事前連絡要');
   expect(html).not.toContain('ベビーベッド');
