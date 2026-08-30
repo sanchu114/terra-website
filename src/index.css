@@ -98,6 +98,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .availability-calendar p, .availability-form__intro { margin: 0 0 18px; color: var(--muted); font-size: .8rem; }
 .availability-calendar__frame { width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: #fff; border: 1px solid var(--line); }
 .availability-calendar iframe { width: 100%; height: 100%; display: block; border: 0; }
+.availability-calendar .availability-calendar__note { margin: 10px 0 0; font-size: .78rem; }
 .booking-result { min-height: 180px; padding: 30px 0 36px; grid-column: 1 / -1; border-top: 1px solid var(--line); }
 .booking-fields { display: grid; gap: 16px; }
 .booking-fields--dates { grid-template-columns: 1fr 1fr; }
