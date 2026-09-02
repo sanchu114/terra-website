@@ -5,7 +5,10 @@ const TEST_REQUEST_ID = 'terra-test-20260902-1015-01';
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { message: 'Method Not Allowed' });
-  if (process.env.CONTEXT !== 'deploy-preview') return json(403, { message: 'Deploy Preview only' });
+  const requestHost = String(event.headers?.host || '').toLowerCase();
+  if (requestHost !== 'deploy-preview-1--thriving-tiramisu-94cdbc.netlify.app') {
+    return json(403, { message: 'Deploy Preview only' });
+  }
 
   try {
     const data = JSON.parse(event.body || '{}');
