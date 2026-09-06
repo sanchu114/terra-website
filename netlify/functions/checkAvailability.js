@@ -1,4 +1,5 @@
 const { json, calendarClient, calculateQuote, isAvailable, publicQuote } = require('./lib/booking');
+const { logError } = require('./lib/safeLog');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { message: 'Method Not Allowed' });
@@ -20,7 +21,7 @@ exports.handler = async (event) => {
     if (!available) return json(200, { status: 'unavailable' });
     return json(200, { status: 'available', quote: publicQuote(quote) });
   } catch (error) {
-    console.error('Availability Error:', error);
+    logError('Availability Error', error);
     return json(500, { status: 'error', message: '空室情報を取得できませんでした。' });
   }
 };
