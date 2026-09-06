@@ -1,5 +1,6 @@
 const { WebhooksHelper } = require('square');
 const { calendarClient } = require('./lib/booking');
+const { logError } = require('./lib/safeLog');
 
 const text = (statusCode, body) => ({ statusCode, headers: { 'Content-Type': 'text/plain; charset=utf-8' }, body });
 
