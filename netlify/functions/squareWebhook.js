@@ -1,5 +1,6 @@
 const { WebhooksHelper } = require('square');
 const { calendarClient } = require('./lib/booking');
+const { logError } = require('./lib/safeLog');
 
 const text = (statusCode, body) => ({ statusCode, headers: { 'Content-Type': 'text/plain; charset=utf-8' }, body });
 
@@ -59,7 +60,7 @@ exports.handler = async (event) => {
     });
     const bookingEvent = found.data.items?.[0];
     if (!bookingEvent) {
-      console.error(`No calendar event for invoice ${invoiceId}`);
+      console.error('Square webhook: no matching calendar event.');
       return text(200, 'No matching booking');
     }
 
@@ -81,10 +82,10 @@ exports.handler = async (event) => {
       clientId: privateProperties.gaClientId,
       value: Number(privateProperties.totalPrice || 0),
       requestId: privateProperties.requestId || invoiceId,
-    }).catch((error) => console.error('GA confirmation event failed:', error));
+    }).catch((error) => logError('GA confirmation event failed', error));
     return text(200, 'Confirmed');
   } catch (error) {
-    console.error('Square Webhook Error:', error);
+    logError('Square Webhook Error', error);
     return text(500, 'Error');
   }
 };

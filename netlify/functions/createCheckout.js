@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { Client, Environment } = require('square');
 const { json, calendarClient, calculateQuote, isAvailable } = require('./lib/booking');
+const { logError } = require('./lib/safeLog');
 
 const stableKey = (requestId, purpose) => crypto.createHash('sha256').update(`${requestId}:${purpose}`).digest('hex');
 const safeText = (value, max = 500) => String(value || '').trim().slice(0, max);
@@ -134,7 +135,7 @@ exports.handler = async (event) => {
 
     return json(200, { status: 'accepted', requestId: data.requestId });
   } catch (error) {
-    console.error('Booking Request Error:', error);
+    logError('Booking Request Error', error);
     return json(500, { message: '予約リクエストの処理中にエラーが発生しました。' });
   }
 };
